@@ -1,0 +1,221 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Performance Optimizer Test</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+            background-color: #f5f5f5;
+        }
+        .test-container {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            margin-bottom: 20px;
+        }
+        .test-element {
+            width: 100px;
+            height: 100px;
+            background: linear-gradient(45deg, #007bff, #28a745);
+            margin: 10px;
+            animation: pulse 2s infinite;
+        }
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+            100% { transform: scale(1); }
+        }
+        .log {
+            background: #f8f9fa;
+            border: 1px solid #dee2e6;
+            padding: 10px;
+            font-family: monospace;
+            font-size: 12px;
+            max-height: 300px;
+            overflow-y: auto;
+        }
+        .success { color: #28a745; }
+        .error { color: #dc3545; }
+        .warning { color: #ffc107; }
+        button {
+            background: #007bff;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 4px;
+            cursor: pointer;
+            margin: 5px;
+        }
+        button:hover {
+            background: #0056b3;
+        }
+    </style>
+</head>
+<body>
+    <div class="test-container">
+        <h1>Performance Optimizer Test</h1>
+        <p>This page tests the fixed performance optimizer methods.</p>
+        
+        <div class="test-element" id="testElement1"></div>
+        <div class="test-element lottie-animation" id="testElement2" data-animation-path="/assets/lottie/loading.json"></div>
+        
+        <button onclick="runTests()">Run Tests</button>
+        <button onclick="testPauseResume()">Test Pause/Resume</button>
+        <button onclick="testSafeMethodCall()">Test Safe Method Call</button>
+        <button onclick="clearLog()">Clear Log</button>
+        
+        <h3>Test Results:</h3>
+        <div id="testLog" class="log"></div>
+    </div>
+
+    <script src="/js/performance-optimizer.js"></script>
+    <script>
+        let testLog = document.getElementById('testLog');
+        let optimizer;
+
+        function log(message, type = 'info') {
+            const timestamp = new Date().toLocaleTimeString();
+            const className = type === 'error' ? 'error' : type === 'success' ? 'success' : type === 'warning' ? 'warning' : '';
+            testLog.innerHTML += `<div class="${className}">[${timestamp}] ${message}</div>`;
+            testLog.scrollTop = testLog.scrollHeight;
+            console.log(message);
+        }
+
+        function clearLog() {
+            testLog.innerHTML = '';
+        }
+
+        function runTests() {
+            log('Starting Performance Optimizer Tests...', 'info');
+            
+            try {
+                // Initialize optimizer
+                if (window.PerformanceOptimizer) {
+                    optimizer = new PerformanceOptimizer();
+                    log('✓ PerformanceOptimizer initialized successfully', 'success');
+                } else {
+                    log('✗ PerformanceOptimizer class not found', 'error');
+                    return;
+                }
+
+                // Test method existence
+                const methods = ['pauseElementAnimations', 'resumeElementAnimations', 'safeMethodCall', 'validateAnimationMethods', 'provideFallback'];
+                methods.forEach(method => {
+                    if (typeof optimizer[method] === 'function') {
+                        log(`✓ ${method} method exists`, 'success');
+                    } else {
+                        log(`✗ ${method} method missing`, 'error');
+                    }
+                });
+
+                // Test with real elements
+                const testElement1 = document.getElementById('testElement1');
+                const testElement2 = document.getElementById('testElement2');
+
+                // Add mock Lottie animation to test element
+                testElement2.lottieAnimation = {
+                    pause: () => log('Mock Lottie animation paused', 'info'),
+                    play: () => log('Mock Lottie animation resumed', 'info'),
+                    destroy: () => log('Mock Lottie animation destroyed', 'info')
+                };
+
+                // Test validation
+                const validation1 = optimizer.validateAnimationMethods(testElement1);
+                const validation2 = optimizer.validateAnimationMethods(testElement2);
+                
+                log(`Element 1 validation: CSS=${validation1.hasCSSAnimations}, Lottie=${validation1.hasLottieAnimation}`, 'info');
+                log(`Element 2 validation: CSS=${validation2.hasCSSAnimations}, Lottie=${validation2.hasLottieAnimation}`, 'info');
+
+                log('All tests completed successfully!', 'success');
+
+            } catch (error) {
+                log(`✗ Test failed: ${error.message}`, 'error');
+            }
+        }
+
+        function testPauseResume() {
+            if (!optimizer) {
+                log('Please run main tests first to initialize optimizer', 'warning');
+                return;
+            }
+
+            try {
+                const testElement = document.getElementById('testElement2');
+                
+                log('Testing pause/resume cycle...', 'info');
+                
+                // Test pause
+                optimizer.pauseElementAnimations(testElement);
+                log('✓ Pause animation completed', 'success');
+                
+                // Test resume
+                setTimeout(() => {
+                    optimizer.resumeElementAnimations(testElement);
+                    log('✓ Resume animation completed', 'success');
+                }, 1000);
+
+            } catch (error) {
+                log(`✗ Pause/Resume test failed: ${error.message}`, 'error');
+            }
+        }
+
+        function testSafeMethodCall() {
+            if (!optimizer) {
+                log('Please run main tests first to initialize optimizer', 'warning');
+                return;
+            }
+
+            try {
+                log('Testing safe method calls...', 'info');
+
+                // Test with valid object and method
+                const mockObject = {
+                    validMethod: () => 'success',
+                    throwingMethod: () => { throw new Error('Test error'); }
+                };
+
+                const result1 = optimizer.safeMethodCall(mockObject, 'validMethod');
+                log(`✓ Valid method call result: ${result1}`, 'success');
+
+                // Test with invalid method
+                const result2 = optimizer.safeMethodCall(mockObject, 'invalidMethod', [], () => 'fallback');
+                log(`✓ Invalid method call with fallback: ${result2}`, 'success');
+
+                // Test with throwing method
+                const result3 = optimizer.safeMethodCall(mockObject, 'throwingMethod', [], () => 'error fallback');
+                log(`✓ Throwing method call with fallback: ${result3}`, 'success');
+
+                // Test with null object
+                const result4 = optimizer.safeMethodCall(null, 'anyMethod', [], () => 'null fallback');
+                log(`✓ Null object call with fallback: ${result4}`, 'success');
+
+            } catch (error) {
+                log(`✗ Safe method call test failed: ${error.message}`, 'error');
+            }
+        }
+
+        // Override console methods to capture logs
+        const originalConsoleWarn = console.warn;
+        const originalConsoleError = console.error;
+        
+        console.warn = function(...args) {
+            log(`WARN: ${args.join(' ')}`, 'warning');
+            originalConsoleWarn.apply(console, args);
+        };
+        
+        console.error = function(...args) {
+            log(`ERROR: ${args.join(' ')}`, 'error');
+            originalConsoleError.apply(console, args);
+        };
+
+        // Auto-run tests when page loads
+        document.addEventListener('DOMContentLoaded', () => {
+            log('Page loaded, ready for testing', 'info');
+        });
+    </script>
+</body>
+</html>

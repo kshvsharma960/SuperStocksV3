@@ -1,0 +1,404 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Loading State Manager Test</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+            background-color: #f5f5f5;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        
+        .test-section {
+            margin: 20px 0;
+            padding: 15px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+        }
+        
+        .test-component {
+            width: 300px;
+            height: 150px;
+            background: #e9ecef;
+            border: 2px dashed #6c757d;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 10px 0;
+            position: relative;
+            border-radius: 5px;
+        }
+        
+        .controls {
+            margin: 10px 0;
+        }
+        
+        .btn {
+            background: #007bff;
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            margin: 5px;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        
+        .btn:hover {
+            background: #0056b3;
+        }
+        
+        .btn.danger {
+            background: #dc3545;
+        }
+        
+        .btn.danger:hover {
+            background: #c82333;
+        }
+        
+        .btn.success {
+            background: #28a745;
+        }
+        
+        .btn.success:hover {
+            background: #218838;
+        }
+        
+        .status {
+            background: #f8f9fa;
+            padding: 10px;
+            border-radius: 4px;
+            margin: 10px 0;
+            font-family: monospace;
+            font-size: 12px;
+        }
+        
+        .log {
+            background: #343a40;
+            color: #fff;
+            padding: 15px;
+            border-radius: 4px;
+            font-family: monospace;
+            font-size: 12px;
+            max-height: 300px;
+            overflow-y: auto;
+            margin: 20px 0;
+        }
+        
+        h1, h2 {
+            color: #333;
+        }
+        
+        .demo-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+            margin: 20px 0;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🔄 Loading State Manager Test Suite</h1>
+        <p>This page demonstrates and tests the Loading State Manager functionality including timeout handling, progress indication, and multi-component coordination.</p>
+        
+        <div class="controls">
+            <button class="btn success" onclick="runAllTests()">🧪 Run All Tests</button>
+            <button class="btn danger" onclick="clearLog()">🗑️ Clear Log</button>
+            <button class="btn" onclick="forceCleanup()">🧹 Force Cleanup</button>
+        </div>
+        
+        <div class="log" id="testLog">
+            <div>Ready to run tests...</div>
+        </div>
+        
+        <h2>Manual Testing Components</h2>
+        
+        <div class="demo-grid">
+            <!-- Basic Loading Test -->
+            <div class="test-section">
+                <h3>Basic Loading</h3>
+                <div class="test-component" id="basic-test">
+                    Basic Test Component
+                </div>
+                <div class="controls">
+                    <button class="btn" onclick="startBasicLoading()">Start Loading</button>
+                    <button class="btn" onclick="completeBasicLoading()">Complete</button>
+                </div>
+                <div class="status" id="basic-status">Status: Ready</div>
+            </div>
+            
+            <!-- Progress Test -->
+            <div class="test-section">
+                <h3>Progress Updates</h3>
+                <div class="test-component" id="progress-test">
+                    Progress Test Component
+                </div>
+                <div class="controls">
+                    <button class="btn" onclick="startProgressDemo()">Start Progress Demo</button>
+                    <button class="btn" onclick="updateProgress(25)">25%</button>
+                    <button class="btn" onclick="updateProgress(50)">50%</button>
+                    <button class="btn" onclick="updateProgress(75)">75%</button>
+                    <button class="btn" onclick="updateProgress(100)">100%</button>
+                </div>
+                <div class="status" id="progress-status">Status: Ready</div>
+            </div>
+            
+            <!-- Timeout Test -->
+            <div class="test-section">
+                <h3>Timeout Handling</h3>
+                <div class="test-component" id="timeout-test">
+                    Timeout Test Component
+                </div>
+                <div class="controls">
+                    <button class="btn" onclick="startTimeoutTest()">Start (3s timeout)</button>
+                    <button class="btn" onclick="completeTimeoutTest()">Complete Before Timeout</button>
+                </div>
+                <div class="status" id="timeout-status">Status: Ready</div>
+            </div>
+            
+            <!-- Global Loading Test -->
+            <div class="test-section">
+                <h3>Global Loading</h3>
+                <div class="test-component" id="global-test">
+                    Global Loading Test
+                </div>
+                <div class="controls">
+                    <button class="btn" onclick="startGlobalLoading()">Start Global Loading</button>
+                    <button class="btn" onclick="completeGlobalLoading()">Complete</button>
+                </div>
+                <div class="status" id="global-status">Status: Ready</div>
+            </div>
+        </div>
+        
+        <h2>Multi-Component Test</h2>
+        <div class="test-section">
+            <div class="demo-grid">
+                <div class="test-component" id="multi-1">Component 1</div>
+                <div class="test-component" id="multi-2">Component 2</div>
+                <div class="test-component" id="multi-3">Component 3</div>
+            </div>
+            <div class="controls">
+                <button class="btn" onclick="startMultiLoading()">Start All Loading</button>
+                <button class="btn" onclick="completeMultiLoading()">Complete All</button>
+                <button class="btn" onclick="completeRandomMulti()">Complete Random</button>
+            </div>
+            <div class="status" id="multi-status">Status: Ready</div>
+        </div>
+        
+        <h2>Loading State Information</h2>
+        <div class="status" id="manager-status">
+            <div>Active Loaders: <span id="active-count">0</span></div>
+            <div>Is Any Loading: <span id="any-loading">false</span></div>
+            <div>Active Components: <span id="active-components">none</span></div>
+        </div>
+    </div>
+
+    <!-- Include the loading state manager -->
+    <script src="js/loading-state-manager.js"></script>
+    <script src="js/loading-state-manager-test.js"></script>
+    
+    <script>
+        let progressInterval;
+        
+        // Update status display
+        function updateStatus() {
+            const manager = window.loadingStateManager;
+            document.getElementById('active-count').textContent = manager.getActiveLoaders().length;
+            document.getElementById('any-loading').textContent = manager.isAnyLoading();
+            document.getElementById('active-components').textContent = 
+                manager.getActiveLoaders().join(', ') || 'none';
+        }
+        
+        // Update status every second
+        setInterval(updateStatus, 1000);
+        
+        // Log function
+        function log(message) {
+            const logElement = document.getElementById('testLog');
+            const timestamp = new Date().toLocaleTimeString();
+            logElement.innerHTML += `<div>[${timestamp}] ${message}</div>`;
+            logElement.scrollTop = logElement.scrollHeight;
+        }
+        
+        // Clear log
+        function clearLog() {
+            document.getElementById('testLog').innerHTML = '<div>Log cleared...</div>';
+        }
+        
+        // Force cleanup
+        function forceCleanup() {
+            window.loadingStateManager.forceCleanup();
+            log('🧹 Force cleanup executed');
+            updateStatus();
+        }
+        
+        // Run all automated tests
+        async function runAllTests() {
+            log('🧪 Starting automated test suite...');
+            const tester = new LoadingStateManagerTest();
+            const results = await tester.runAllTests();
+            
+            const passed = results.filter(r => r.status === 'PASS').length;
+            const total = results.length;
+            log(`✅ Tests completed: ${passed}/${total} passed`);
+        }
+        
+        // Basic loading test
+        function startBasicLoading() {
+            const manager = window.loadingStateManager;
+            manager.startLoading('basic-test', {
+                message: 'Loading basic component...',
+                onComplete: (success) => {
+                    document.getElementById('basic-status').textContent = 
+                        `Status: Completed (${success ? 'Success' : 'Failed'})`;
+                    log(`Basic loading completed: ${success}`);
+                }
+            });
+            document.getElementById('basic-status').textContent = 'Status: Loading...';
+            log('Basic loading started');
+        }
+        
+        function completeBasicLoading() {
+            window.loadingStateManager.completeLoading('basic-test', true);
+        }
+        
+        // Progress demo
+        function startProgressDemo() {
+            const manager = window.loadingStateManager;
+            manager.startLoading('progress-test', {
+                message: 'Starting progress demo...',
+                onComplete: (success) => {
+                    document.getElementById('progress-status').textContent = 
+                        `Status: Completed (${success ? 'Success' : 'Failed'})`;
+                    log(`Progress demo completed: ${success}`);
+                }
+            });
+            
+            document.getElementById('progress-status').textContent = 'Status: Loading...';
+            log('Progress demo started');
+            
+            // Auto-progress demo
+            let progress = 0;
+            progressInterval = setInterval(() => {
+                progress += 10;
+                manager.updateProgress('progress-test', progress, `Loading... ${progress}%`);
+                
+                if (progress >= 100) {
+                    clearInterval(progressInterval);
+                    setTimeout(() => {
+                        manager.completeLoading('progress-test', true);
+                    }, 1000);
+                }
+            }, 500);
+        }
+        
+        function updateProgress(percentage) {
+            window.loadingStateManager.updateProgress('progress-test', percentage, `Manual update: ${percentage}%`);
+            log(`Progress updated to ${percentage}%`);
+        }
+        
+        // Timeout test
+        function startTimeoutTest() {
+            const manager = window.loadingStateManager;
+            manager.startLoading('timeout-test', {
+                message: 'Testing timeout (3s)...',
+                timeout: 3000,
+                onTimeout: () => {
+                    document.getElementById('timeout-status').textContent = 'Status: Timed out!';
+                    log('⏰ Timeout test timed out');
+                },
+                onComplete: (success) => {
+                    document.getElementById('timeout-status').textContent = 
+                        `Status: Completed (${success ? 'Success' : 'Failed'})`;
+                    log(`Timeout test completed: ${success}`);
+                }
+            });
+            
+            document.getElementById('timeout-status').textContent = 'Status: Loading (will timeout in 3s)...';
+            log('Timeout test started (3 second timeout)');
+        }
+        
+        function completeTimeoutTest() {
+            window.loadingStateManager.completeLoading('timeout-test', true);
+        }
+        
+        // Global loading test
+        function startGlobalLoading() {
+            const manager = window.loadingStateManager;
+            manager.startLoading('global-test', {
+                message: 'Global loading demonstration...',
+                showGlobal: true,
+                onComplete: (success) => {
+                    document.getElementById('global-status').textContent = 
+                        `Status: Completed (${success ? 'Success' : 'Failed'})`;
+                    log(`Global loading completed: ${success}`);
+                }
+            });
+            
+            document.getElementById('global-status').textContent = 'Status: Global loading active...';
+            log('Global loading started');
+        }
+        
+        function completeGlobalLoading() {
+            window.loadingStateManager.completeLoading('global-test', true);
+        }
+        
+        // Multi-component test
+        function startMultiLoading() {
+            const manager = window.loadingStateManager;
+            
+            ['multi-1', 'multi-2', 'multi-3'].forEach((component, index) => {
+                manager.startLoading(component, {
+                    message: `Loading component ${index + 1}...`,
+                    onComplete: (success) => {
+                        log(`${component} completed: ${success}`);
+                    }
+                });
+            });
+            
+            document.getElementById('multi-status').textContent = 'Status: All components loading...';
+            log('Multi-component loading started');
+        }
+        
+        function completeMultiLoading() {
+            ['multi-1', 'multi-2', 'multi-3'].forEach(component => {
+                window.loadingStateManager.completeLoading(component, true);
+            });
+            document.getElementById('multi-status').textContent = 'Status: All completed';
+        }
+        
+        function completeRandomMulti() {
+            const components = ['multi-1', 'multi-2', 'multi-3'];
+            const activeComponents = components.filter(c => 
+                window.loadingStateManager.getLoadingState(c) !== null
+            );
+            
+            if (activeComponents.length > 0) {
+                const randomComponent = activeComponents[Math.floor(Math.random() * activeComponents.length)];
+                window.loadingStateManager.completeLoading(randomComponent, true);
+                log(`Randomly completed: ${randomComponent}`);
+            }
+        }
+        
+        // Listen for retry events
+        document.addEventListener('loadingRetry', (event) => {
+            log(`🔄 Retry requested for: ${event.detail.component}`);
+        });
+        
+        // Initial status update
+        updateStatus();
+        log('Loading State Manager Test Page initialized');
+    </script>
+</body>
+</html>

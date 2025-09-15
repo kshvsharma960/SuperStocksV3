@@ -1,0 +1,231 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Leaderboard Data Manager Test</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        .test-container {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            margin-bottom: 20px;
+        }
+        .test-results {
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 4px;
+            border-left: 4px solid #007bff;
+            font-family: monospace;
+            white-space: pre-wrap;
+        }
+        .demo-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+        .demo-table th,
+        .demo-table td {
+            padding: 12px;
+            text-align: left;
+            border-bottom: 1px solid #ddd;
+        }
+        .demo-table th {
+            background-color: #f8f9fa;
+            font-weight: 600;
+        }
+        .demo-table .rank {
+            font-weight: bold;
+            color: #007bff;
+        }
+        .demo-table .positive {
+            color: #28a745;
+        }
+        .demo-table .negative {
+            color: #dc3545;
+        }
+        .controls {
+            margin: 20px 0;
+        }
+        .controls button {
+            background: #007bff;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 4px;
+            cursor: pointer;
+            margin-right: 10px;
+        }
+        .controls button:hover {
+            background: #0056b3;
+        }
+        .controls input {
+            padding: 8px 12px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            margin-right: 10px;
+        }
+    </style>
+</head>
+<body>
+    <h1>Leaderboard Data Manager Test</h1>
+    
+    <div class="test-container">
+        <h2>Automated Tests</h2>
+        <p>The following tests verify the core functionality of the LeaderboardDataManager:</p>
+        <div id="testResults" class="test-results">
+            Running tests...
+        </div>
+    </div>
+
+    <div class="test-container">
+        <h2>Interactive Demo</h2>
+        <p>This demo shows the data manager processing sample leaderboard data:</p>
+        
+        <div class="controls">
+            <input type="text" id="searchInput" placeholder="Search participants..." />
+            <select id="filterSelect">
+                <option value="all">All Participants</option>
+                <option value="gainers">Gainers Only</option>
+                <option value="losers">Losers Only</option>
+                <option value="top10">Top 10</option>
+            </select>
+            <button onclick="refreshDemo()">Refresh Data</button>
+            <button onclick="runTests()">Run Tests Again</button>
+        </div>
+
+        <table class="demo-table" id="demoTable">
+            <thead>
+                <tr>
+                    <th>Rank</th>
+                    <th>Display Name</th>
+                    <th>Email</th>
+                    <th>Portfolio Value</th>
+                    <th>P&L</th>
+                    <th>P&L %</th>
+                </tr>
+            </thead>
+            <tbody id="demoTableBody">
+                <tr>
+                    <td colspan="6">Loading...</td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+
+    <script src="js/leaderboard-data-manager.js"></script>
+    <script>
+        let dataManager;
+        let currentData = [];
+
+        // Initialize the demo
+        document.addEventListener('DOMContentLoaded', function() {
+            dataManager = new LeaderboardDataManager();
+            
+            // Capture console output for test results
+            const originalLog = console.log;
+            const originalError = console.error;
+            let testOutput = '';
+            
+            console.log = function(...args) {
+                testOutput += args.join(' ') + '\n';
+                originalLog.apply(console, args);
+            };
+            
+            console.error = function(...args) {
+                testOutput += 'ERROR: ' + args.join(' ') + '\n';
+                originalError.apply(console, args);
+            };
+
+            // Run tests and capture output
+            setTimeout(() => {
+                runTests();
+                
+                setTimeout(() => {
+                    document.getElementById('testResults').textContent = testOutput;
+                    
+                    // Restore console
+                    console.log = originalLog;
+                    console.error = originalError;
+                    
+                    // Load demo data
+                    loadDemoData();
+                }, 500);
+            }, 100);
+
+            // Bind search and filter events
+            document.getElementById('searchInput').addEventListener('input', updateDemo);
+            document.getElementById('filterSelect').addEventListener('change', updateDemo);
+        });
+
+        function runTests() {
+            if (window.LeaderboardDataManagerTest) {
+                const tester = new LeaderboardDataManagerTest();
+                tester.runAllTests();
+            }
+        }
+
+        async function loadDemoData() {
+            try {
+                currentData = await dataManager.getLeaderboardData();
+                updateDemo();
+            } catch (error) {
+                console.error('Failed to load demo data:', error);
+                document.getElementById('demoTableBody').innerHTML = 
+                    '<tr><td colspan="6">Failed to load data</td></tr>';
+            }
+        }
+
+        function updateDemo() {
+            const searchTerm = document.getElementById('searchInput').value;
+            const filterType = document.getElementById('filterSelect').value;
+            
+            const filteredData = dataManager.searchAndFilter(currentData, searchTerm, filterType);
+            
+            const tbody = document.getElementById('demoTableBody');
+            
+            if (filteredData.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="6">No participants found</td></tr>';
+                return;
+            }
+
+            tbody.innerHTML = filteredData.map(participant => {
+                const displayName = participant.displayName || dataManager.resolveDisplayName(participant);
+                const pnlClass = participant.pnl >= 0 ? 'positive' : 'negative';
+                
+                return `
+                    <tr>
+                        <td class="rank">${participant.rank}</td>
+                        <td>${displayName}</td>
+                        <td>${participant.email}</td>
+                        <td>₹${formatCurrency(participant.portfolioValue)}</td>
+                        <td class="${pnlClass}">₹${formatCurrency(Math.abs(participant.pnl))}</td>
+                        <td class="${pnlClass}">${participant.pnlPercent.toFixed(2)}%</td>
+                    </tr>
+                `;
+            }).join('');
+        }
+
+        function refreshDemo() {
+            dataManager.clearCache();
+            loadDemoData();
+        }
+
+        function formatCurrency(amount) {
+            return new Intl.NumberFormat('en-IN', {
+                minimumFractionDigits: 0,
+                maximumFractionDigits: 0
+            }).format(amount);
+        }
+    </script>
+    <script src="js/leaderboard-data-manager-test.js"></script>
+</body>
+</html>

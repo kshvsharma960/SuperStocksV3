@@ -1,0 +1,704 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Error Recovery UI Components Test</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background: #f8f9fa;
+        }
+        
+        .test-container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        
+        .test-section {
+            background: white;
+            margin: 20px 0;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        
+        .test-section h2 {
+            margin-top: 0;
+            color: #333;
+            border-bottom: 2px solid #007bff;
+            padding-bottom: 10px;
+        }
+        
+        .test-controls {
+            margin: 15px 0;
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+        
+        .test-btn {
+            background: #007bff;
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 14px;
+        }
+        
+        .test-btn:hover {
+            background: #0056b3;
+        }
+        
+        .test-btn.secondary {
+            background: #6c757d;
+        }
+        
+        .test-btn.danger {
+            background: #dc3545;
+        }
+        
+        .demo-area {
+            min-height: 200px;
+            border: 2px dashed #dee2e6;
+            border-radius: 8px;
+            padding: 20px;
+            margin: 15px 0;
+            background: #fafafa;
+        }
+        
+        .demo-area.active {
+            border-color: #007bff;
+            background: white;
+        }
+        
+        .status-indicator {
+            display: inline-block;
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 12px;
+            font-weight: bold;
+            margin-left: 10px;
+        }
+        
+        .status-success {
+            background: #d4edda;
+            color: #155724;
+        }
+        
+        .status-error {
+            background: #f8d7da;
+            color: #721c24;
+        }
+        
+        .status-warning {
+            background: #fff3cd;
+            color: #856404;
+        }
+    </style>
+</head>
+<body>
+    <div class="test-container">
+        <h1>Error Recovery UI Components Test Suite</h1>
+        <p>This page tests all error recovery UI components to ensure they work correctly according to requirements 4.3, 4.4, 5.2, and 5.3.</p>
+
+        <!-- Error Message Components Test -->
+        <div class="test-section">
+            <h2>Error Message Components <span id="error-status" class="status-indicator status-warning">Not Tested</span></h2>
+            <p>Test reusable error message components with retry functionality (Requirement 4.3, 4.4)</p>
+            
+            <div class="test-controls">
+                <button class="test-btn" onclick="testErrorMessage()">Test Basic Error</button>
+                <button class="test-btn" onclick="testWarningMessage()">Test Warning</button>
+                <button class="test-btn" onclick="testInfoMessage()">Test Info</button>
+                <button class="test-btn" onclick="testErrorWithRetry()">Test Error with Retry</button>
+                <button class="test-btn" onclick="testErrorWithActions()">Test Error with Actions</button>
+                <button class="test-btn secondary" onclick="clearErrorDemo()">Clear</button>
+            </div>
+            
+            <div id="error-demo" class="demo-area">
+                <p>Click buttons above to test different error message types</p>
+            </div>
+        </div>
+
+        <!-- Loading Components Test -->
+        <div class="test-section">
+            <h2>Loading Spinner & Progress Components <span id="loading-status" class="status-indicator status-warning">Not Tested</span></h2>
+            <p>Test loading spinner and progress indicator components (Requirement 5.2, 5.3)</p>
+            
+            <div class="test-controls">
+                <button class="test-btn" onclick="testLoadingSpinner()">Test Loading Spinner</button>
+                <button class="test-btn" onclick="testProgressIndicator()">Test Progress Bar</button>
+                <button class="test-btn" onclick="testProgressiveLoading()">Test Progressive Loading</button>
+                <button class="test-btn" onclick="testLoadingSizes()">Test Different Sizes</button>
+                <button class="test-btn secondary" onclick="clearLoadingDemo()">Clear</button>
+            </div>
+            
+            <div id="loading-demo" class="demo-area">
+                <p>Click buttons above to test different loading states</p>
+            </div>
+        </div>
+
+        <!-- Timeout Notification Test -->
+        <div class="test-section">
+            <h2>Timeout Notification Components <span id="timeout-status" class="status-indicator status-warning">Not Tested</span></h2>
+            <p>Test timeout notification and recovery option components (Requirement 4.3, 5.3)</p>
+            
+            <div class="test-controls">
+                <button class="test-btn" onclick="testTimeoutNotification()">Test Timeout Warning</button>
+                <button class="test-btn" onclick="testTimeoutWithActions()">Test Timeout with Actions</button>
+                <button class="test-btn" onclick="testAutoTimeout()">Test Auto-Dismiss Timeout</button>
+                <button class="test-btn secondary" onclick="clearTimeoutDemo()">Clear</button>
+            </div>
+            
+            <div id="timeout-demo" class="demo-area">
+                <p>Click buttons above to test timeout notifications</p>
+            </div>
+        </div>
+
+        <!-- Fallback Content Test -->
+        <div class="test-section">
+            <h2>Fallback Content Components <span id="fallback-status" class="status-indicator status-warning">Not Tested</span></h2>
+            <p>Test fallback content components for missing data scenarios (Requirement 4.4)</p>
+            
+            <div class="test-controls">
+                <button class="test-btn" onclick="testBasicFallback()">Test Basic Fallback</button>
+                <button class="test-btn" onclick="testPortfolioFallback()">Test Portfolio Fallback</button>
+                <button class="test-btn" onclick="testLeaderboardFallback()">Test Leaderboard Fallback</button>
+                <button class="test-btn" onclick="testEmptyDataFallback()">Test Empty Data</button>
+                <button class="test-btn secondary" onclick="clearFallbackDemo()">Clear</button>
+            </div>
+            
+            <div id="fallback-demo" class="demo-area">
+                <p>Click buttons above to test fallback content</p>
+            </div>
+        </div>
+
+        <!-- Dashboard Integration Test -->
+        <div class="test-section">
+            <h2>Dashboard Error Recovery Integration <span id="dashboard-status" class="status-indicator status-warning">Not Tested</span></h2>
+            <p>Test dashboard-specific error recovery components</p>
+            
+            <div class="test-controls">
+                <button class="test-btn" onclick="testDashboardPortfolioError()">Test Portfolio Error</button>
+                <button class="test-btn" onclick="testDashboardFundsError()">Test Funds Error</button>
+                <button class="test-btn" onclick="testDashboardRankError()">Test Rank Error</button>
+                <button class="test-btn" onclick="testDashboardLoading()">Test Dashboard Loading</button>
+                <button class="test-btn secondary" onclick="clearDashboardDemo()">Clear</button>
+            </div>
+            
+            <div id="dashboard-demo" class="demo-area">
+                <p>Click buttons above to test dashboard error recovery</p>
+            </div>
+        </div>
+
+        <!-- Leaderboard Integration Test -->
+        <div class="test-section">
+            <h2>Leaderboard Error Recovery Integration <span id="leaderboard-status" class="status-indicator status-warning">Not Tested</span></h2>
+            <p>Test leaderboard-specific error recovery components</p>
+            
+            <div class="test-controls">
+                <button class="test-btn" onclick="testLeaderboardError()">Test Leaderboard Error</button>
+                <button class="test-btn" onclick="testLeaderboardLoading()">Test Leaderboard Loading</button>
+                <button class="test-btn" onclick="testLeaderboardEmpty()">Test Empty Leaderboard</button>
+                <button class="test-btn" onclick="testLeaderboardTimeout()">Test Leaderboard Timeout</button>
+                <button class="test-btn secondary" onclick="clearLeaderboardDemo()">Clear</button>
+            </div>
+            
+            <div id="leaderboard-demo" class="demo-area">
+                <p>Click buttons above to test leaderboard error recovery</p>
+            </div>
+        </div>
+
+        <!-- Test Results Summary -->
+        <div class="test-section">
+            <h2>Test Results Summary</h2>
+            <div id="test-summary">
+                <p>Run tests above to see results summary</p>
+            </div>
+            <button class="test-btn" onclick="runAllTests()">Run All Tests</button>
+            <button class="test-btn secondary" onclick="clearAllTests()">Clear All</button>
+        </div>
+    </div>
+
+    <!-- Include the error recovery UI components -->
+    <script src="js/error-recovery-ui.js"></script>
+    <script src="js/dashboard-error-recovery.js"></script>
+    <script src="js/leaderboard-error-recovery.js"></script>
+
+    <script>
+        // Test tracking
+        let testResults = {
+            errorMessages: false,
+            loadingComponents: false,
+            timeoutNotifications: false,
+            fallbackContent: false,
+            dashboardIntegration: false,
+            leaderboardIntegration: false
+        };
+
+        // Error Message Tests
+        function testErrorMessage() {
+            const container = document.getElementById('error-demo');
+            container.classList.add('active');
+            
+            const errorComponent = window.ErrorRecoveryUI.createErrorMessage({
+                title: 'Test Error',
+                message: 'This is a test error message to verify the component works correctly.',
+                type: 'error'
+            });
+            
+            container.innerHTML = '';
+            container.appendChild(errorComponent);
+            updateTestStatus('error-status', true);
+            testResults.errorMessages = true;
+        }
+
+        function testWarningMessage() {
+            const container = document.getElementById('error-demo');
+            container.classList.add('active');
+            
+            const warningComponent = window.ErrorRecoveryUI.createErrorMessage({
+                title: 'Test Warning',
+                message: 'This is a test warning message.',
+                type: 'warning'
+            });
+            
+            container.innerHTML = '';
+            container.appendChild(warningComponent);
+        }
+
+        function testInfoMessage() {
+            const container = document.getElementById('error-demo');
+            container.classList.add('active');
+            
+            const infoComponent = window.ErrorRecoveryUI.createErrorMessage({
+                title: 'Test Information',
+                message: 'This is a test information message.',
+                type: 'info'
+            });
+            
+            container.innerHTML = '';
+            container.appendChild(infoComponent);
+        }
+
+        function testErrorWithRetry() {
+            const container = document.getElementById('error-demo');
+            container.classList.add('active');
+            
+            let retryCount = 0;
+            const errorComponent = window.ErrorRecoveryUI.createErrorMessage({
+                title: 'Retry Test Error',
+                message: 'This error has retry functionality. Click "Try Again" to test.',
+                type: 'error',
+                onRetry: () => {
+                    retryCount++;
+                    alert(`Retry attempt #${retryCount}`);
+                    return Promise.resolve();
+                }
+            });
+            
+            container.innerHTML = '';
+            container.appendChild(errorComponent);
+        }
+
+        function testErrorWithActions() {
+            const container = document.getElementById('error-demo');
+            container.classList.add('active');
+            
+            const errorComponent = window.ErrorRecoveryUI.createErrorMessage({
+                title: 'Error with Actions',
+                message: 'This error has custom action buttons.',
+                type: 'error',
+                actions: [
+                    {
+                        text: 'Primary Action',
+                        onClick: () => alert('Primary action clicked')
+                    },
+                    {
+                        text: 'Secondary Action',
+                        onClick: () => alert('Secondary action clicked'),
+                        secondary: true
+                    }
+                ]
+            });
+            
+            container.innerHTML = '';
+            container.appendChild(errorComponent);
+        }
+
+        function clearErrorDemo() {
+            const container = document.getElementById('error-demo');
+            container.innerHTML = '<p>Click buttons above to test different error message types</p>';
+            container.classList.remove('active');
+        }
+
+        // Loading Component Tests
+        function testLoadingSpinner() {
+            const container = document.getElementById('loading-demo');
+            container.classList.add('active');
+            
+            const loadingComponent = window.ErrorRecoveryUI.createLoadingSpinner({
+                text: 'Loading test data...',
+                size: 'medium'
+            });
+            
+            container.innerHTML = '';
+            container.appendChild(loadingComponent);
+            updateTestStatus('loading-status', true);
+            testResults.loadingComponents = true;
+        }
+
+        function testProgressIndicator() {
+            const container = document.getElementById('loading-demo');
+            container.classList.add('active');
+            
+            const progressComponent = window.ErrorRecoveryUI.createProgressIndicator({
+                progress: 0,
+                text: 'Processing...',
+                showPercentage: true
+            });
+            
+            container.innerHTML = '';
+            container.appendChild(progressComponent.element);
+            
+            // Simulate progress
+            let progress = 0;
+            const interval = setInterval(() => {
+                progress += 10;
+                progressComponent.updateProgress(progress, 'Processing...');
+                if (progress >= 100) {
+                    clearInterval(interval);
+                    setTimeout(() => {
+                        progressComponent.updateProgress(100, 'Complete!');
+                    }, 500);
+                }
+            }, 300);
+        }
+
+        function testProgressiveLoading() {
+            const container = document.getElementById('loading-demo');
+            container.classList.add('active');
+            
+            const steps = [
+                'Initializing...',
+                'Loading data...',
+                'Processing results...',
+                'Finalizing...'
+            ];
+            
+            window.DashboardErrorRecovery.showProgressiveLoading(container, steps);
+        }
+
+        function testLoadingSizes() {
+            const container = document.getElementById('loading-demo');
+            container.classList.add('active');
+            container.innerHTML = '';
+            
+            ['small', 'medium', 'large'].forEach(size => {
+                const loadingComponent = window.ErrorRecoveryUI.createLoadingSpinner({
+                    text: `${size} spinner`,
+                    size: size
+                });
+                container.appendChild(loadingComponent);
+            });
+        }
+
+        function clearLoadingDemo() {
+            const container = document.getElementById('loading-demo');
+            container.innerHTML = '<p>Click buttons above to test different loading states</p>';
+            container.classList.remove('active');
+        }
+
+        // Timeout Notification Tests
+        function testTimeoutNotification() {
+            const container = document.getElementById('timeout-demo');
+            container.classList.add('active');
+            
+            const timeoutComponent = window.ErrorRecoveryUI.createTimeoutNotification({
+                message: 'This operation is taking longer than expected.',
+                onRetry: () => alert('Retry clicked'),
+                onCancel: () => alert('Cancel clicked'),
+                timeout: 10000
+            });
+            
+            container.innerHTML = '';
+            container.appendChild(timeoutComponent);
+            updateTestStatus('timeout-status', true);
+            testResults.timeoutNotifications = true;
+        }
+
+        function testTimeoutWithActions() {
+            const container = document.getElementById('timeout-demo');
+            container.classList.add('active');
+            
+            window.DashboardErrorRecovery.showTimeoutWarning(
+                container,
+                'test operation',
+                () => alert('Retry from dashboard recovery'),
+                () => alert('Cancel from dashboard recovery')
+            );
+        }
+
+        function testAutoTimeout() {
+            const container = document.getElementById('timeout-demo');
+            container.classList.add('active');
+            
+            const timeoutComponent = window.ErrorRecoveryUI.createTimeoutNotification({
+                message: 'This notification will auto-dismiss in 5 seconds.',
+                timeout: 5000
+            });
+            
+            container.innerHTML = '';
+            container.appendChild(timeoutComponent);
+        }
+
+        function clearTimeoutDemo() {
+            const container = document.getElementById('timeout-demo');
+            container.innerHTML = '<p>Click buttons above to test timeout notifications</p>';
+            container.classList.remove('active');
+        }
+
+        // Fallback Content Tests
+        function testBasicFallback() {
+            const container = document.getElementById('fallback-demo');
+            container.classList.add('active');
+            
+            const fallbackComponent = window.ErrorRecoveryUI.createFallbackContent({
+                title: 'No Data Available',
+                message: 'The requested data is not available at this time.',
+                icon: '📄',
+                actions: [
+                    {
+                        text: 'Refresh',
+                        onClick: () => alert('Refresh clicked')
+                    }
+                ]
+            });
+            
+            container.innerHTML = '';
+            container.appendChild(fallbackComponent);
+            updateTestStatus('fallback-status', true);
+            testResults.fallbackContent = true;
+        }
+
+        function testPortfolioFallback() {
+            const container = document.getElementById('fallback-demo');
+            container.classList.add('active');
+            
+            window.DashboardErrorRecovery.showPortfolioFallback(container);
+        }
+
+        function testLeaderboardFallback() {
+            const container = document.getElementById('fallback-demo');
+            container.classList.add('active');
+            
+            window.LeaderboardErrorRecovery.showEmptyLeaderboard(container);
+        }
+
+        function testEmptyDataFallback() {
+            const container = document.getElementById('fallback-demo');
+            container.classList.add('active');
+            
+            const fallbackComponent = window.ErrorRecoveryUI.createFallbackContent({
+                title: 'Empty Dataset',
+                message: 'No records found matching your criteria.',
+                icon: '🔍',
+                actions: [
+                    {
+                        text: 'Clear Filters',
+                        onClick: () => alert('Filters cleared')
+                    },
+                    {
+                        text: 'Add New Record',
+                        onClick: () => alert('Add new record'),
+                        secondary: true
+                    }
+                ]
+            });
+            
+            container.innerHTML = '';
+            container.appendChild(fallbackComponent);
+        }
+
+        function clearFallbackDemo() {
+            const container = document.getElementById('fallback-demo');
+            container.innerHTML = '<p>Click buttons above to test fallback content</p>';
+            container.classList.remove('active');
+        }
+
+        // Dashboard Integration Tests
+        function testDashboardPortfolioError() {
+            const container = document.getElementById('dashboard-demo');
+            container.classList.add('active');
+            
+            const error = new Error('Portfolio data timeout');
+            window.DashboardErrorRecovery.handlePortfolioError(
+                container,
+                error,
+                () => alert('Portfolio retry clicked')
+            );
+            updateTestStatus('dashboard-status', true);
+            testResults.dashboardIntegration = true;
+        }
+
+        function testDashboardFundsError() {
+            const container = document.getElementById('dashboard-demo');
+            container.classList.add('active');
+            
+            const error = new Error('Funds loading failed');
+            window.DashboardErrorRecovery.handleFundsError(
+                container,
+                error,
+                () => alert('Funds retry clicked')
+            );
+        }
+
+        function testDashboardRankError() {
+            const container = document.getElementById('dashboard-demo');
+            container.classList.add('active');
+            
+            const error = new Error('Rank calculation failed');
+            window.DashboardErrorRecovery.handleRankError(
+                container,
+                error,
+                () => alert('Rank retry clicked')
+            );
+        }
+
+        function testDashboardLoading() {
+            const container = document.getElementById('dashboard-demo');
+            container.classList.add('active');
+            
+            window.DashboardErrorRecovery.showDashboardLoading(container, 'portfolio data');
+        }
+
+        function clearDashboardDemo() {
+            const container = document.getElementById('dashboard-demo');
+            container.innerHTML = '<p>Click buttons above to test dashboard error recovery</p>';
+            container.classList.remove('active');
+        }
+
+        // Leaderboard Integration Tests
+        function testLeaderboardError() {
+            const container = document.getElementById('leaderboard-demo');
+            container.classList.add('active');
+            
+            const error = new Error('Leaderboard network timeout');
+            window.LeaderboardErrorRecovery.handleLeaderboardError(
+                container,
+                error,
+                () => alert('Leaderboard retry clicked')
+            );
+            updateTestStatus('leaderboard-status', true);
+            testResults.leaderboardIntegration = true;
+        }
+
+        function testLeaderboardLoading() {
+            const container = document.getElementById('leaderboard-demo');
+            container.classList.add('active');
+            
+            window.LeaderboardErrorRecovery.showLeaderboardLoading(container);
+        }
+
+        function testLeaderboardEmpty() {
+            const container = document.getElementById('leaderboard-demo');
+            container.classList.add('active');
+            
+            window.LeaderboardErrorRecovery.showEmptyLeaderboard(container);
+        }
+
+        function testLeaderboardTimeout() {
+            const container = document.getElementById('leaderboard-demo');
+            container.classList.add('active');
+            
+            window.LeaderboardErrorRecovery.showLeaderboardTimeout(
+                container,
+                () => alert('Leaderboard timeout retry'),
+                () => alert('Leaderboard timeout cancel')
+            );
+        }
+
+        function clearLeaderboardDemo() {
+            const container = document.getElementById('leaderboard-demo');
+            container.innerHTML = '<p>Click buttons above to test leaderboard error recovery</p>';
+            container.classList.remove('active');
+        }
+
+        // Utility Functions
+        function updateTestStatus(elementId, success) {
+            const element = document.getElementById(elementId);
+            if (success) {
+                element.className = 'status-indicator status-success';
+                element.textContent = 'Passed';
+            } else {
+                element.className = 'status-indicator status-error';
+                element.textContent = 'Failed';
+            }
+        }
+
+        function runAllTests() {
+            // Run a basic test for each component type
+            testErrorMessage();
+            setTimeout(() => testLoadingSpinner(), 500);
+            setTimeout(() => testTimeoutNotification(), 1000);
+            setTimeout(() => testBasicFallback(), 1500);
+            setTimeout(() => testDashboardPortfolioError(), 2000);
+            setTimeout(() => testLeaderboardError(), 2500);
+            
+            setTimeout(() => updateTestSummary(), 3000);
+        }
+
+        function clearAllTests() {
+            clearErrorDemo();
+            clearLoadingDemo();
+            clearTimeoutDemo();
+            clearFallbackDemo();
+            clearDashboardDemo();
+            clearLeaderboardDemo();
+            
+            // Reset test status
+            Object.keys(testResults).forEach(key => testResults[key] = false);
+            
+            ['error-status', 'loading-status', 'timeout-status', 'fallback-status', 'dashboard-status', 'leaderboard-status'].forEach(id => {
+                const element = document.getElementById(id);
+                element.className = 'status-indicator status-warning';
+                element.textContent = 'Not Tested';
+            });
+            
+            updateTestSummary();
+        }
+
+        function updateTestSummary() {
+            const summary = document.getElementById('test-summary');
+            const passedTests = Object.values(testResults).filter(result => result).length;
+            const totalTests = Object.keys(testResults).length;
+            
+            summary.innerHTML = `
+                <h3>Test Results: ${passedTests}/${totalTests} components tested</h3>
+                <ul>
+                    <li>Error Messages: ${testResults.errorMessages ? '✅ Passed' : '❌ Not tested'}</li>
+                    <li>Loading Components: ${testResults.loadingComponents ? '✅ Passed' : '❌ Not tested'}</li>
+                    <li>Timeout Notifications: ${testResults.timeoutNotifications ? '✅ Passed' : '❌ Not tested'}</li>
+                    <li>Fallback Content: ${testResults.fallbackContent ? '✅ Passed' : '❌ Not tested'}</li>
+                    <li>Dashboard Integration: ${testResults.dashboardIntegration ? '✅ Passed' : '❌ Not tested'}</li>
+                    <li>Leaderboard Integration: ${testResults.leaderboardIntegration ? '✅ Passed' : '❌ Not tested'}</li>
+                </ul>
+                <p><strong>Requirements Coverage:</strong></p>
+                <ul>
+                    <li>4.3 (Specific error messages): ${testResults.errorMessages ? '✅' : '❌'}</li>
+                    <li>4.4 (Fallback content): ${testResults.fallbackContent ? '✅' : '❌'}</li>
+                    <li>5.2 (Progress indicators): ${testResults.loadingComponents ? '✅' : '❌'}</li>
+                    <li>5.3 (Progress updates): ${testResults.timeoutNotifications ? '✅' : '❌'}</li>
+                </ul>
+            `;
+        }
+
+        // Initialize test summary on page load
+        document.addEventListener('DOMContentLoaded', updateTestSummary);
+    </script>
+</body>
+</html>

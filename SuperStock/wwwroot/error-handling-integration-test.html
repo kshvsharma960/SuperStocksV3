@@ -1,0 +1,245 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Error Handling Integration Test</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        .test-section {
+            margin: 20px 0;
+            padding: 15px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+        }
+        .test-button {
+            margin: 5px;
+            padding: 8px 16px;
+            background: #007bff;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        .test-button:hover {
+            background: #0056b3;
+        }
+        .error-button {
+            background: #dc3545;
+        }
+        .error-button:hover {
+            background: #c82333;
+        }
+        .stats-display {
+            background: #f8f9fa;
+            padding: 10px;
+            border-radius: 4px;
+            margin: 10px 0;
+            font-family: monospace;
+            white-space: pre-wrap;
+        }
+    </style>
+</head>
+<body data-page="test">
+    <h1>Error Handling Integration Test</h1>
+    
+    <div class="test-section">
+        <h3>Error Boundary Tests</h3>
+        <button class="test-button error-button" onclick="testJavaScriptError()">Test JavaScript Error</button>
+        <button class="test-button error-button" onclick="testPromiseRejection()">Test Promise Rejection</button>
+        <button class="test-button error-button" onclick="testApiError()">Test API Error</button>
+        <button class="test-button error-button" onclick="testComponentError()">Test Component Error</button>
+    </div>
+    
+    <div class="test-section">
+        <h3>Recovery Tests</h3>
+        <button class="test-button" onclick="testComponentRecovery()">Test Component Recovery</button>
+        <button class="test-button" onclick="testEventRecovery()">Test Event Recovery</button>
+        <button class="test-button" onclick="resetErrorBoundaries()">Reset Error Boundaries</button>
+    </div>
+    
+    <div class="test-section">
+        <h3>Analytics Tests</h3>
+        <button class="test-button" onclick="showErrorStats()">Show Error Statistics</button>
+        <button class="test-button" onclick="clearErrorMetrics()">Clear Error Metrics</button>
+        <button class="test-button" onclick="exportErrorData()">Export Error Data</button>
+    </div>
+    
+    <div class="test-section">
+        <h3>Integration Verification</h3>
+        <button class="test-button" onclick="runIntegrationTests()">Run Integration Tests</button>
+        <button class="test-button" onclick="generateTestReport()">Generate Test Report</button>
+    </div>
+    
+    <div class="test-section">
+        <h3>Error Statistics</h3>
+        <div id="stats-display" class="stats-display">Click "Show Error Statistics" to view current stats</div>
+    </div>
+
+    <!-- Include required scripts -->
+    <script src="/js/enhanced-error-handler.js"></script>
+    <script src="/js/modern-app.js"></script>
+    <script src="/js/error-handling-integration-verification.js"></script>
+    
+    <script>
+        // Test functions
+        function testJavaScriptError() {
+            console.log('Testing JavaScript error...');
+            // This will trigger a ReferenceError
+            nonExistentFunction();
+        }
+        
+        function testPromiseRejection() {
+            console.log('Testing promise rejection...');
+            Promise.reject(new Error('Test promise rejection'));
+        }
+        
+        function testApiError() {
+            console.log('Testing API error...');
+            fetch('/api/nonexistent-endpoint')
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+                    }
+                    return response.json();
+                })
+                .catch(error => {
+                    if (window.ModernApp && window.ModernApp.errorHandler) {
+                        window.ModernApp.errorHandler.handleApiError('/api/nonexistent-endpoint', error, 0);
+                    }
+                });
+        }
+        
+        function testComponentError() {
+            console.log('Testing component error...');
+            if (window.ModernApp && window.ModernApp.errorHandler) {
+                window.ModernApp.errorHandler.handleComponentError(
+                    'test-component',
+                    new Error('Test component error'),
+                    { testContext: 'integration-test' }
+                );
+            }
+        }
+        
+        function testComponentRecovery() {
+            console.log('Testing component recovery...');
+            if (window.ModernApp) {
+                window.ModernApp.attemptComponentRecovery();
+            }
+        }
+        
+        function testEventRecovery() {
+            console.log('Testing event recovery...');
+            if (window.ModernApp) {
+                window.ModernApp.reinitializeEventListeners();
+            }
+        }
+        
+        function resetErrorBoundaries() {
+            console.log('Resetting error boundaries...');
+            if (window.ModernApp) {
+                window.ModernApp.resetErrorBoundaries();
+                updateStatsDisplay();
+            }
+        }
+        
+        function showErrorStats() {
+            console.log('Showing error statistics...');
+            updateStatsDisplay();
+        }
+        
+        function clearErrorMetrics() {
+            console.log('Clearing error metrics...');
+            localStorage.removeItem('errorMetrics');
+            if (window.ModernApp && window.ModernApp.errorHandler) {
+                window.ModernApp.errorHandler.clearErrors();
+            }
+            updateStatsDisplay();
+        }
+        
+        function exportErrorData() {
+            console.log('Exporting error data...');
+            const stats = window.ModernApp ? window.ModernApp.getErrorStats() : {};
+            const metrics = JSON.parse(localStorage.getItem('errorMetrics') || '[]');
+            
+            const exportData = {
+                timestamp: new Date().toISOString(),
+                stats: stats,
+                metrics: metrics
+            };
+            
+            const blob = new Blob([JSON.stringify(exportData, null, 2)], { type: 'application/json' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `error-data-${Date.now()}.json`;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+        }
+        
+        function updateStatsDisplay() {
+            const statsElement = document.getElementById('stats-display');
+            
+            if (window.ModernApp) {
+                const stats = window.ModernApp.getErrorStats();
+                const metrics = JSON.parse(localStorage.getItem('errorMetrics') || '[]');
+                
+                const displayData = {
+                    'Error Handler Status': window.ModernApp.errorHandler ? 'Active' : 'Not Available',
+                    'Session Statistics': stats.session || 'Not Available',
+                    'Error Boundaries': stats.boundaries || {},
+                    'Enhanced Handler Stats': stats.enhancedHandler || 'Not Available',
+                    'Stored Metrics Count': metrics.length,
+                    'Last Update': new Date().toLocaleTimeString()
+                };
+                
+                statsElement.textContent = JSON.stringify(displayData, null, 2);
+            } else {
+                statsElement.textContent = 'ModernApp not initialized';
+            }
+        }
+        
+        function runIntegrationTests() {
+            console.log('Running integration tests...');
+            if (window.errorHandlingTests) {
+                window.errorHandlingTests.runAllTests().then(results => {
+                    alert(`Integration Tests Complete!\nPassed: ${results.passed}\nFailed: ${results.failed}\nTotal: ${results.total}`);
+                });
+            } else {
+                alert('Integration tests not available. Please refresh the page.');
+            }
+        }
+        
+        function generateTestReport() {
+            console.log('Generating test report...');
+            if (window.errorHandlingTests) {
+                const report = window.errorHandlingTests.generateReport();
+                const blob = new Blob([JSON.stringify(report, null, 2)], { type: 'application/json' });
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = `error-handling-test-report-${Date.now()}.json`;
+                document.body.appendChild(a);
+                a.click();
+                document.body.removeChild(a);
+                URL.revokeObjectURL(url);
+            } else {
+                alert('Test report not available. Please run tests first.');
+            }
+        }
+        
+        // Auto-update stats every 5 seconds
+        setInterval(updateStatsDisplay, 5000);
+        
+        // Initial stats display
+        setTimeout(updateStatsDisplay, 1000);
+    </script>
+</body>
+</html>

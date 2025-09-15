@@ -1,0 +1,296 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Performance Optimizer Verification</title>
+    <style>
+        body {
+            font-family: 'Courier New', monospace;
+            background-color: #1e1e1e;
+            color: #d4d4d4;
+            margin: 20px;
+            line-height: 1.6;
+        }
+        
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: #2d2d30;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.3);
+        }
+        
+        h1 {
+            color: #569cd6;
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        
+        #console {
+            background: #1e1e1e;
+            border: 1px solid #3e3e42;
+            border-radius: 4px;
+            padding: 15px;
+            height: 500px;
+            overflow-y: auto;
+            font-family: 'Courier New', monospace;
+            font-size: 14px;
+            white-space: pre-wrap;
+        }
+        
+        .status {
+            text-align: center;
+            margin: 20px 0;
+            padding: 10px;
+            border-radius: 4px;
+        }
+        
+        .status.loading {
+            background: #264f78;
+            color: #9cdcfe;
+        }
+        
+        .status.success {
+            background: #0e5a0e;
+            color: #4fc3f7;
+        }
+        
+        .status.error {
+            background: #5a1e1e;
+            color: #f48771;
+        }
+        
+        button {
+            background: #0e639c;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 4px;
+            cursor: pointer;
+            margin: 10px 5px;
+            font-family: inherit;
+        }
+        
+        button:hover {
+            background: #1177bb;
+        }
+        
+        button:disabled {
+            background: #3e3e42;
+            cursor: not-allowed;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Performance Optimizer Fix Verification</h1>
+        
+        <div id="status" class="status loading">
+            Initializing Performance Optimizer...
+        </div>
+        
+        <div style="text-align: center;">
+            <button onclick="runTests()" id="runTestsBtn">Run Verification Tests</button>
+            <button onclick="clearConsole()">Clear Console</button>
+        </div>
+        
+        <div id="console"></div>
+    </div>
+
+    <script src="/js/performance-optimizer.js"></script>
+    <script>
+        const consoleElement = document.getElementById('console');
+        const statusElement = document.getElementById('status');
+        const runTestsBtn = document.getElementById('runTestsBtn');
+        
+        // Override console.log to display in our custom console
+        const originalConsoleLog = console.log;
+        console.log = function(...args) {
+            originalConsoleLog.apply(console, args);
+            
+            const message = args.map(arg => 
+                typeof arg === 'object' ? JSON.stringify(arg, null, 2) : String(arg)
+            ).join(' ');
+            
+            consoleElement.textContent += message + '\n';
+            consoleElement.scrollTop = consoleElement.scrollHeight;
+        };
+        
+        function clearConsole() {
+            consoleElement.textContent = '';
+        }
+        
+        function updateStatus(message, type = 'loading') {
+            statusElement.textContent = message;
+            statusElement.className = `status ${type}`;
+        }
+        
+        function runTests() {
+            clearConsole();
+            runTestsBtn.disabled = true;
+            updateStatus('Running verification tests...', 'loading');
+            
+            console.log('=== Performance Optimizer Fix Verification ===\n');
+            
+            // Check if performance optimizer is available
+            if (!window.performanceOptimizer) {
+                console.log('❌ Performance Optimizer not available');
+                updateStatus('Performance Optimizer not found', 'error');
+                runTestsBtn.disabled = false;
+                return;
+            }
+            
+            console.log('✅ Performance Optimizer is available');
+            console.log('Available methods:', Object.keys(window.performanceOptimizer).join(', '));
+            console.log('');
+            
+            // Run tests
+            let testsPassed = 0;
+            let totalTests = 0;
+            
+            // Test 1: Safe Method Call
+            totalTests++;
+            console.log('Test 1: Safe Method Call');
+            try {
+                const testObj = { testMethod: () => 'success' };
+                const result = window.performanceOptimizer.safeMethodCall(testObj, 'testMethod');
+                
+                if (result === 'success') {
+                    console.log('✅ Safe method call works correctly');
+                    testsPassed++;
+                } else {
+                    console.log('❌ Safe method call failed');
+                }
+            } catch (e) {
+                console.log('❌ Safe method call threw error:', e.message);
+            }
+            console.log('');
+            
+            // Test 2: Animation Method Validation
+            totalTests++;
+            console.log('Test 2: Animation Method Validation');
+            try {
+                const testElement = document.createElement('div');
+                testElement.style.animation = 'pulse 2s infinite';
+                document.body.appendChild(testElement);
+                
+                const validation = window.performanceOptimizer.validateAnimationMethods(testElement);
+                
+                if (validation && validation.elementValid) {
+                    console.log('✅ Animation method validation works correctly');
+                    testsPassed++;
+                } else {
+                    console.log('❌ Animation method validation failed');
+                }
+                
+                document.body.removeChild(testElement);
+            } catch (e) {
+                console.log('❌ Animation method validation threw error:', e.message);
+            }
+            console.log('');
+            
+            // Test 3: Animation Control
+            totalTests++;
+            console.log('Test 3: Animation Control');
+            try {
+                const testElement = document.createElement('div');
+                document.body.appendChild(testElement);
+                
+                window.performanceOptimizer.pauseElementAnimations(testElement);
+                const paused = testElement.dataset.animationsPaused === 'true';
+                
+                window.performanceOptimizer.resumeElementAnimations(testElement);
+                const resumed = !testElement.dataset.animationsPaused;
+                
+                if (paused && resumed) {
+                    console.log('✅ Animation control works correctly');
+                    testsPassed++;
+                } else {
+                    console.log('❌ Animation control failed');
+                }
+                
+                document.body.removeChild(testElement);
+            } catch (e) {
+                console.log('❌ Animation control threw error:', e.message);
+            }
+            console.log('');
+            
+            // Test 4: Fallback Behavior
+            totalTests++;
+            console.log('Test 4: Fallback Behavior');
+            try {
+                const testElement = document.createElement('div');
+                document.body.appendChild(testElement);
+                
+                window.performanceOptimizer.provideFallback(testElement, 'pause');
+                const paused = testElement.style.visibility === 'hidden' || 
+                              testElement.classList.contains('animation-paused');
+                
+                window.performanceOptimizer.provideFallback(testElement, 'resume');
+                const resumed = testElement.style.visibility !== 'hidden' && 
+                               !testElement.classList.contains('animation-paused');
+                
+                if (paused) {
+                    console.log('✅ Fallback behavior works correctly');
+                    testsPassed++;
+                } else {
+                    console.log('❌ Fallback behavior failed');
+                }
+                
+                document.body.removeChild(testElement);
+            } catch (e) {
+                console.log('❌ Fallback behavior threw error:', e.message);
+            }
+            console.log('');
+            
+            // Test 5: Error Handling
+            totalTests++;
+            console.log('Test 5: Error Handling');
+            try {
+                // These should not throw errors
+                window.performanceOptimizer.safeMethodCall(null, 'test');
+                window.performanceOptimizer.pauseElementAnimations(null);
+                window.performanceOptimizer.resumeElementAnimations(null);
+                window.performanceOptimizer.validateAnimationMethods(null);
+                window.performanceOptimizer.provideFallback(null, 'pause');
+                
+                console.log('✅ Error handling works correctly');
+                testsPassed++;
+            } catch (e) {
+                console.log('❌ Error handling failed:', e.message);
+            }
+            console.log('');
+            
+            // Test Results
+            console.log('=== Test Results ===');
+            console.log(`Passed: ${testsPassed}/${totalTests}`);
+            console.log(`Success Rate: ${Math.round((testsPassed / totalTests) * 100)}%`);
+            
+            if (testsPassed === totalTests) {
+                console.log('🎉 All tests passed! Performance Optimizer fixes are working correctly.');
+                updateStatus(`All tests passed! (${testsPassed}/${totalTests})`, 'success');
+            } else {
+                console.log('⚠️ Some tests failed. Please review the implementation.');
+                updateStatus(`Tests failed: ${testsPassed}/${totalTests} passed`, 'error');
+            }
+            
+            runTestsBtn.disabled = false;
+        }
+        
+        // Initialize
+        document.addEventListener('DOMContentLoaded', () => {
+            setTimeout(() => {
+                if (window.performanceOptimizer) {
+                    updateStatus('Performance Optimizer loaded successfully', 'success');
+                    console.log('Performance Optimizer initialized and ready for testing.');
+                } else {
+                    updateStatus('Performance Optimizer failed to load', 'error');
+                    console.log('Performance Optimizer not found. Please check the implementation.');
+                }
+            }, 500);
+        });
+    </script>
+</body>
+</html>

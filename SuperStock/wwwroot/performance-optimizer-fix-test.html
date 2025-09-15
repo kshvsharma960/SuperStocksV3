@@ -1,0 +1,363 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Performance Optimizer Fix Test</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+            background-color: #f5f5f5;
+        }
+        
+        .test-container {
+            background: white;
+            padding: 20px;
+            margin: 10px 0;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        
+        .test-element {
+            width: 100px;
+            height: 100px;
+            background: linear-gradient(45deg, #007bff, #28a745);
+            margin: 10px;
+            border-radius: 8px;
+            animation: pulse 2s infinite;
+        }
+        
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+            100% { transform: scale(1); }
+        }
+        
+        .animate {
+            animation: slideIn 1s ease-in-out;
+        }
+        
+        @keyframes slideIn {
+            from { transform: translateX(-100%); }
+            to { transform: translateX(0); }
+        }
+        
+        .animation-paused {
+            animation-play-state: paused !important;
+        }
+        
+        .visually-hidden {
+            visibility: hidden !important;
+        }
+        
+        .test-results {
+            background: #e9ecef;
+            padding: 15px;
+            border-radius: 5px;
+            margin: 10px 0;
+            font-family: monospace;
+        }
+        
+        .success { color: #28a745; }
+        .error { color: #dc3545; }
+        .warning { color: #ffc107; }
+        
+        button {
+            background: #007bff;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            margin: 5px;
+        }
+        
+        button:hover {
+            background: #0056b3;
+        }
+    </style>
+</head>
+<body>
+    <h1>Performance Optimizer Fix Test</h1>
+    
+    <div class="test-container">
+        <h2>Test 1: Safe Method Calling</h2>
+        <p>Testing safeMethodCall with various scenarios</p>
+        <button onclick="testSafeMethodCall()">Run Safe Method Call Tests</button>
+        <div id="safeMethodResults" class="test-results"></div>
+    </div>
+    
+    <div class="test-container">
+        <h2>Test 2: Animation Method Validation</h2>
+        <p>Testing validateAnimationMethods functionality</p>
+        <div class="test-element" id="testElement1"></div>
+        <button onclick="testAnimationValidation()">Run Animation Validation Tests</button>
+        <div id="animationValidationResults" class="test-results"></div>
+    </div>
+    
+    <div class="test-container">
+        <h2>Test 3: Element Animation Control</h2>
+        <p>Testing pauseElementAnimations and resumeElementAnimations</p>
+        <div class="test-element animate" id="testElement2"></div>
+        <button onclick="testPauseAnimation()">Pause Animation</button>
+        <button onclick="testResumeAnimation()">Resume Animation</button>
+        <div id="animationControlResults" class="test-results"></div>
+    </div>
+    
+    <div class="test-container">
+        <h2>Test 4: Fallback Behavior</h2>
+        <p>Testing provideFallback functionality</p>
+        <div class="test-element" id="testElement3"></div>
+        <button onclick="testFallbackPause()">Test Fallback Pause</button>
+        <button onclick="testFallbackResume()">Test Fallback Resume</button>
+        <div id="fallbackResults" class="test-results"></div>
+    </div>
+    
+    <div class="test-container">
+        <h2>Test 5: DOM Mutation Handling</h2>
+        <p>Testing enhanced DOM mutation processing</p>
+        <div id="mutationContainer"></div>
+        <button onclick="testDOMMutations()">Test DOM Mutations</button>
+        <div id="mutationResults" class="test-results"></div>
+    </div>
+    
+    <div class="test-container">
+        <h2>Test 6: Error Recovery</h2>
+        <p>Testing error handling and recovery mechanisms</p>
+        <button onclick="testErrorRecovery()">Test Error Recovery</button>
+        <div id="errorRecoveryResults" class="test-results"></div>
+    </div>
+
+    <script src="/js/performance-optimizer.js"></script>
+    <script>
+        let testResults = {
+            safeMethodCall: [],
+            animationValidation: [],
+            animationControl: [],
+            fallback: [],
+            domMutation: [],
+            errorRecovery: []
+        };
+
+        function logResult(category, test, result, message) {
+            testResults[category].push({ test, result, message });
+            console.log(`${category} - ${test}: ${result ? 'PASS' : 'FAIL'} - ${message}`);
+        }
+
+        function displayResults(category, elementId) {
+            const element = document.getElementById(elementId);
+            const results = testResults[category];
+            
+            let html = `<h4>Test Results for ${category}:</h4>`;
+            results.forEach(result => {
+                const className = result.result ? 'success' : 'error';
+                html += `<div class="${className}">${result.test}: ${result.result ? 'PASS' : 'FAIL'} - ${result.message}</div>`;
+            });
+            
+            element.innerHTML = html;
+        }
+
+        function testSafeMethodCall() {
+            testResults.safeMethodCall = [];
+            
+            // Test 1: Valid object and method
+            try {
+                const testObj = { testMethod: () => 'success' };
+                const result = window.performanceOptimizer.safeMethodCall(testObj, 'testMethod');
+                logResult('safeMethodCall', 'Valid Method Call', result === 'success', 'Method called successfully');
+            } catch (e) {
+                logResult('safeMethodCall', 'Valid Method Call', false, `Error: ${e.message}`);
+            }
+            
+            // Test 2: Invalid object
+            try {
+                const result = window.performanceOptimizer.safeMethodCall(null, 'testMethod', [], () => 'fallback');
+                logResult('safeMethodCall', 'Null Object', result === 'fallback', 'Fallback executed correctly');
+            } catch (e) {
+                logResult('safeMethodCall', 'Null Object', false, `Error: ${e.message}`);
+            }
+            
+            // Test 3: Non-existent method
+            try {
+                const testObj = {};
+                const result = window.performanceOptimizer.safeMethodCall(testObj, 'nonExistentMethod', [], () => 'fallback');
+                logResult('safeMethodCall', 'Non-existent Method', result === 'fallback', 'Fallback executed for missing method');
+            } catch (e) {
+                logResult('safeMethodCall', 'Non-existent Method', false, `Error: ${e.message}`);
+            }
+            
+            // Test 4: Method throws error
+            try {
+                const testObj = { errorMethod: () => { throw new Error('Test error'); } };
+                const result = window.performanceOptimizer.safeMethodCall(testObj, 'errorMethod', [], () => 'fallback');
+                logResult('safeMethodCall', 'Method Throws Error', result === 'fallback', 'Fallback executed after method error');
+            } catch (e) {
+                logResult('safeMethodCall', 'Method Throws Error', false, `Error: ${e.message}`);
+            }
+            
+            displayResults('safeMethodCall', 'safeMethodResults');
+        }
+
+        function testAnimationValidation() {
+            testResults.animationValidation = [];
+            
+            const testElement = document.getElementById('testElement1');
+            
+            // Test 1: Basic element validation
+            try {
+                const validation = window.performanceOptimizer.validateAnimationMethods(testElement);
+                logResult('animationValidation', 'Element Validation', validation.elementValid, 'Element validated successfully');
+                logResult('animationValidation', 'CSS Animation Detection', validation.hasCSSAnimations, 'CSS animations detected');
+            } catch (e) {
+                logResult('animationValidation', 'Element Validation', false, `Error: ${e.message}`);
+            }
+            
+            // Test 2: Invalid element
+            try {
+                const validation = window.performanceOptimizer.validateAnimationMethods(null);
+                logResult('animationValidation', 'Null Element', !validation.elementValid, 'Null element handled correctly');
+            } catch (e) {
+                logResult('animationValidation', 'Null Element', false, `Error: ${e.message}`);
+            }
+            
+            // Test 3: Element with Lottie animation (simulated)
+            try {
+                testElement.lottieAnimation = { 
+                    pause: () => {}, 
+                    play: () => {} 
+                };
+                const validation = window.performanceOptimizer.validateAnimationMethods(testElement);
+                logResult('animationValidation', 'Lottie Animation', validation.hasLottieAnimation && validation.canPause && validation.canResume, 'Lottie animation methods validated');
+                delete testElement.lottieAnimation;
+            } catch (e) {
+                logResult('animationValidation', 'Lottie Animation', false, `Error: ${e.message}`);
+            }
+            
+            displayResults('animationValidation', 'animationValidationResults');
+        }
+
+        function testPauseAnimation() {
+            testResults.animationControl = [];
+            
+            const testElement = document.getElementById('testElement2');
+            
+            try {
+                window.performanceOptimizer.pauseElementAnimations(testElement);
+                const isPaused = testElement.dataset.animationsPaused === 'true';
+                logResult('animationControl', 'Pause Animation', isPaused, 'Animation paused successfully');
+            } catch (e) {
+                logResult('animationControl', 'Pause Animation', false, `Error: ${e.message}`);
+            }
+            
+            displayResults('animationControl', 'animationControlResults');
+        }
+
+        function testResumeAnimation() {
+            const testElement = document.getElementById('testElement2');
+            
+            try {
+                window.performanceOptimizer.resumeElementAnimations(testElement);
+                const isResumed = !testElement.dataset.animationsPaused;
+                logResult('animationControl', 'Resume Animation', isResumed, 'Animation resumed successfully');
+            } catch (e) {
+                logResult('animationControl', 'Resume Animation', false, `Error: ${e.message}`);
+            }
+            
+            displayResults('animationControl', 'animationControlResults');
+        }
+
+        function testFallbackPause() {
+            testResults.fallback = [];
+            
+            const testElement = document.getElementById('testElement3');
+            
+            try {
+                window.performanceOptimizer.provideFallback(testElement, 'pause');
+                const isHidden = testElement.style.visibility === 'hidden' || 
+                               testElement.classList.contains('visually-hidden');
+                logResult('fallback', 'Fallback Pause', isHidden, 'Fallback pause executed');
+            } catch (e) {
+                logResult('fallback', 'Fallback Pause', false, `Error: ${e.message}`);
+            }
+            
+            displayResults('fallback', 'fallbackResults');
+        }
+
+        function testFallbackResume() {
+            const testElement = document.getElementById('testElement3');
+            
+            try {
+                window.performanceOptimizer.provideFallback(testElement, 'resume');
+                const isVisible = testElement.style.visibility !== 'hidden' && 
+                                !testElement.classList.contains('visually-hidden');
+                logResult('fallback', 'Fallback Resume', isVisible, 'Fallback resume executed');
+            } catch (e) {
+                logResult('fallback', 'Fallback Resume', false, `Error: ${e.message}`);
+            }
+            
+            displayResults('fallback', 'fallbackResults');
+        }
+
+        function testDOMMutations() {
+            testResults.domMutation = [];
+            
+            const container = document.getElementById('mutationContainer');
+            
+            try {
+                // Test adding elements
+                const newElement = document.createElement('div');
+                newElement.className = 'test-element';
+                newElement.setAttribute('data-src', 'test.jpg');
+                container.appendChild(newElement);
+                
+                logResult('domMutation', 'Add Element', true, 'Element added successfully');
+                
+                // Test removing elements
+                setTimeout(() => {
+                    container.removeChild(newElement);
+                    logResult('domMutation', 'Remove Element', true, 'Element removed successfully');
+                    displayResults('domMutation', 'mutationResults');
+                }, 100);
+                
+            } catch (e) {
+                logResult('domMutation', 'DOM Mutation', false, `Error: ${e.message}`);
+                displayResults('domMutation', 'mutationResults');
+            }
+        }
+
+        function testErrorRecovery() {
+            testResults.errorRecovery = [];
+            
+            try {
+                // Test with invalid element
+                window.performanceOptimizer.pauseElementAnimations(null);
+                logResult('errorRecovery', 'Null Element Handling', true, 'Null element handled gracefully');
+                
+                // Test with invalid method call
+                window.performanceOptimizer.safeMethodCall({}, 'nonExistentMethod');
+                logResult('errorRecovery', 'Invalid Method Call', true, 'Invalid method call handled gracefully');
+                
+                // Test fallback with invalid element
+                window.performanceOptimizer.provideFallback(null, 'pause');
+                logResult('errorRecovery', 'Fallback Error Handling', true, 'Fallback error handled gracefully');
+                
+            } catch (e) {
+                logResult('errorRecovery', 'Error Recovery', false, `Error: ${e.message}`);
+            }
+            
+            displayResults('errorRecovery', 'errorRecoveryResults');
+        }
+
+        // Initialize tests when page loads
+        document.addEventListener('DOMContentLoaded', () => {
+            console.log('Performance Optimizer Fix Test Page Loaded');
+            console.log('Performance Optimizer Available:', !!window.performanceOptimizer);
+            
+            if (window.performanceOptimizer) {
+                console.log('Performance Optimizer Methods:', Object.keys(window.performanceOptimizer));
+            }
+        });
+    </script>
+</body>
+</html>

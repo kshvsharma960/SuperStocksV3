@@ -12,6 +12,21 @@ class LeaderboardManager {
         this.searchTerm = '';
         this.currentUserEmail = '';
         
+        // Initialize the data manager and error handler
+        this.dataManager = new LeaderboardDataManager();
+        this.errorHandler = window.EnhancedErrorHandler ? new EnhancedErrorHandler() : null;
+        
+        // Error recovery state
+        this.retryCount = 0;
+        this.maxRetries = 3;
+        this.isLoading = false;
+        this.hasError = false;
+        
+        // Initialize error handler if available
+        if (this.errorHandler) {
+            this.errorHandler.initialize();
+        }
+        
         this.init();
     }
 
@@ -65,68 +80,90 @@ class LeaderboardManager {
         }
     }
 
-    async loadLeaderboardData() {
+    async loadLeaderboardData(forceRefresh = false) {
+        if (this.isLoading) {
+            return; // Prevent concurrent loading
+        }
+
         try {
+            this.isLoading = true;
+            this.hasError = false;
             this.showLoading(true);
+            this.hideError();
             
-            // For now, we'll use the existing rankDict data and enhance it
-            // In a real implementation, this would be an API call
-            const response = await this.fetchLeaderboardData();
-            this.leaderboardData = response;
+            // Use the data manager to get processed and validated data
+            const processedData = await this.dataManager.getLeaderboardData(forceRefresh);
+            
+            // Validate that we received valid data
+            if (!Array.isArray(processedData) || processedData.length === 0) {
+                throw new Error('No leaderboard data available');
+            }
+            
+            this.leaderboardData = processedData;
             this.filteredData = [...this.leaderboardData];
+            this.retryCount = 0; // Reset retry count on success
             
-            this.renderTopPerformers();
-            this.filterAndDisplayData();
-            this.renderTopMovers();
-            this.updateCompetitionStats();
+            // Render all components with error handling
+            await this.renderAllComponents();
+            
             this.showLoading(false);
             
         } catch (error) {
-            console.error('Error loading leaderboard data:', error);
-            this.showError('Failed to load leaderboard data');
+            this.isLoading = false;
+            this.hasError = true;
             this.showLoading(false);
+            
+            // Handle error with enhanced error handler
+            if (this.errorHandler) {
+                const shouldRetry = this.errorHandler.handleApiError('leaderboard', error, this.retryCount);
+                
+                if (shouldRetry && this.retryCount < this.maxRetries) {
+                    this.retryCount++;
+                    this.showRetryableError(error, this.retryCount);
+                } else {
+                    this.showFatalError(error);
+                }
+            } else {
+                // Fallback error handling
+                console.error('Error loading leaderboard data:', error);
+                this.showFatalError(error);
+            }
+            
+            // Show fallback content
+            this.showFallbackContent();
         }
     }
 
-    async fetchLeaderboardData() {
-        // Simulate API call - in real implementation, this would fetch from server
-        return new Promise((resolve) => {
-            setTimeout(() => {
-                // Generate mock data based on existing rankDict
-                const mockData = this.generateMockLeaderboardData();
-                resolve(mockData);
-            }, 500);
-        });
-    }
-
-    generateMockLeaderboardData() {
-        // This is temporary mock data - in real implementation, 
-        // this would come from the server with actual user data
-        const participants = [
-            'trader1@example.com', 'trader2@example.com', 'trader3@example.com',
-            'trader4@example.com', 'trader5@example.com', 'trader6@example.com',
-            'trader7@example.com', 'trader8@example.com', 'trader9@example.com',
-            'trader10@example.com'
+    /**
+     * Render all components with individual error handling
+     */
+    async renderAllComponents() {
+        const components = [
+            { name: 'Top Performers', fn: () => this.renderTopPerformers() },
+            { name: 'Leaderboard Table', fn: () => this.filterAndDisplayData() },
+            { name: 'Top Movers', fn: () => this.renderTopMovers() },
+            { name: 'Competition Stats', fn: () => this.updateCompetitionStats() }
         ];
 
-        return participants.map((email, index) => {
-            const portfolioValue = 1000000 + (Math.random() - 0.5) * 200000;
-            const pnl = portfolioValue - 1000000;
-            const pnlPercent = (pnl / 1000000) * 100;
-            
-            return {
-                rank: index + 1,
-                email: email,
-                username: email.split('@')[0],
-                portfolioValue: portfolioValue,
-                pnl: pnl,
-                pnlPercent: pnlPercent,
-                totalTrades: Math.floor(Math.random() * 50) + 10,
-                performanceHistory: this.generatePerformanceHistory(),
-                isCurrentUser: email === this.currentUserEmail
-            };
-        });
+        for (const component of components) {
+            try {
+                await component.fn();
+            } catch (error) {
+                console.error(`Error rendering ${component.name}:`, error);
+                
+                if (this.errorHandler) {
+                    this.errorHandler.handleComponentError(component.name, error, {
+                        leaderboardDataLength: this.leaderboardData.length,
+                        filteredDataLength: this.filteredData.length
+                    });
+                }
+                
+                // Continue with other components even if one fails
+            }
+        }
     }
+
+
 
     generatePerformanceHistory() {
         const history = [];
@@ -147,85 +184,136 @@ class LeaderboardManager {
         const podiumContainer = document.getElementById('topPerformersPodium');
         if (!podiumContainer) return;
 
-        const topThree = this.leaderboardData.slice(0, 3);
-        
-        // Reorder for podium display (2nd, 1st, 3rd)
-        const podiumOrder = [
-            topThree[1], // 2nd place
-            topThree[0], // 1st place  
-            topThree[2]  // 3rd place
-        ].filter(Boolean);
+        try {
+            // Check if we have valid data
+            if (!this.leaderboardData || this.leaderboardData.length === 0) {
+                this.showPodiumFallback(podiumContainer);
+                return;
+            }
 
-        const podiumHTML = podiumOrder.map((participant, index) => {
-            const positions = ['second', 'first', 'third'];
-            const position = positions[index];
-            const actualRank = participant.rank;
+            const topThree = this.leaderboardData.slice(0, 3);
             
-            return `
-                <div class="podium-position ${position}">
-                    <div class="podium-card">
-                        <div class="user-avatar">
-                            ${participant.username.charAt(0).toUpperCase()}
-                        </div>
-                        <div class="user-name">${participant.username}</div>
-                        <div class="portfolio-value">₹${this.formatCurrency(participant.portfolioValue)}</div>
-                        <div class="performance ${participant.pnl >= 0 ? 'positive' : 'negative'}">
-                            ${participant.pnl >= 0 ? '+' : ''}₹${this.formatCurrency(Math.abs(participant.pnl))}
-                            (${participant.pnlPercent >= 0 ? '+' : ''}${participant.pnlPercent.toFixed(2)}%)
-                        </div>
-                    </div>
-                    <div class="podium-base">
-                        <div class="position-number">${actualRank}</div>
-                    </div>
-                </div>
-            `;
-        }).join('');
+            // Validate top performers data
+            const validTopThree = topThree.filter(participant => 
+                participant && 
+                typeof participant.portfolioValue === 'number' && 
+                participant.portfolioValue > 0
+            );
 
-        podiumContainer.innerHTML = podiumHTML;
-        
-        // Add animation
-        setTimeout(() => {
-            podiumContainer.querySelectorAll('.podium-position').forEach((position, index) => {
-                setTimeout(() => {
-                    position.style.opacity = '0';
-                    position.style.transform = 'translateY(20px)';
-                    position.style.transition = 'all 0.6s ease';
-                    
+            if (validTopThree.length === 0) {
+                this.showPodiumFallback(podiumContainer);
+                return;
+            }
+
+            // Reorder for podium display (2nd, 1st, 3rd)
+            const podiumOrder = [
+                validTopThree[1], // 2nd place
+                validTopThree[0], // 1st place  
+                validTopThree[2]  // 3rd place
+            ].filter(Boolean);
+
+            const podiumHTML = podiumOrder.map((participant, index) => {
+                const positions = ['second', 'first', 'third'];
+                const position = positions[index];
+                const actualRank = participant.rank || (index === 1 ? 1 : index === 0 ? 2 : 3);
+                
+                // Use data manager for safe display name resolution
+                const displayName = this.dataManager.resolveDisplayName(participant);
+                const avatar = this.dataManager.generateAvatar(participant);
+                
+                // Safe numeric formatting with fallbacks
+                const portfolioValue = this.safeFormatCurrency(participant.portfolioValue);
+                const pnl = this.safeFormatCurrency(Math.abs(participant.pnl || 0));
+                const pnlPercent = this.safeFormatPercent(participant.pnlPercent);
+                
+                return `
+                    <div class="podium-position ${position}">
+                        <div class="podium-card">
+                            <div class="user-avatar">
+                                ${avatar}
+                            </div>
+                            <div class="user-name" title="${this.escapeHtml(displayName)}">${this.escapeHtml(displayName)}</div>
+                            <div class="portfolio-value">₹${portfolioValue}</div>
+                            <div class="performance ${(participant.pnl || 0) >= 0 ? 'positive' : 'negative'}">
+                                ${(participant.pnl || 0) >= 0 ? '+' : ''}₹${pnl}
+                                (${pnlPercent})
+                            </div>
+                        </div>
+                        <div class="podium-base">
+                            <div class="position-number">${actualRank}</div>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+
+            podiumContainer.innerHTML = podiumHTML;
+            
+            // Add animation with error handling
+            this.animatePodium(podiumContainer);
+            
+        } catch (error) {
+            console.error('Error rendering top performers:', error);
+            this.showPodiumFallback(podiumContainer);
+            
+            if (this.errorHandler) {
+                this.errorHandler.handleComponentError('TopPerformers', error, {
+                    dataLength: this.leaderboardData?.length || 0
+                });
+            }
+        }
+    }
+
+    /**
+     * Show fallback content for podium when data is unavailable
+     */
+    showPodiumFallback(container) {
+        container.innerHTML = `
+            <div class="podium-fallback">
+                <div class="fallback-message">
+                    <i class="fas fa-trophy"></i>
+                    <h4>Top Performers</h4>
+                    <p>Leaderboard data is currently unavailable.</p>
+                    <button class="btn btn-primary btn-sm" onclick="leaderboardManager.retryLoadData()">
+                        <i class="fas fa-sync-alt"></i> Retry
+                    </button>
+                </div>
+            </div>
+        `;
+    }
+
+    /**
+     * Animate podium with error handling
+     */
+    animatePodium(container) {
+        try {
+            setTimeout(() => {
+                const positions = container.querySelectorAll('.podium-position');
+                positions.forEach((position, index) => {
                     setTimeout(() => {
-                        position.style.opacity = '1';
-                        position.style.transform = 'translateY(0)';
-                    }, 50);
-                }, index * 200);
-            });
-        }, 100);
+                        position.style.opacity = '0';
+                        position.style.transform = 'translateY(20px)';
+                        position.style.transition = 'all 0.6s ease';
+                        
+                        setTimeout(() => {
+                            position.style.opacity = '1';
+                            position.style.transform = 'translateY(0)';
+                        }, 50);
+                    }, index * 200);
+                });
+            }, 100);
+        } catch (error) {
+            console.error('Error animating podium:', error);
+            // Animation failure shouldn't break the component
+        }
     }
 
     filterAndDisplayData() {
-        let data = [...this.leaderboardData];
-
-        // Apply search filter
-        if (this.searchTerm) {
-            data = data.filter(participant => 
-                participant.username.toLowerCase().includes(this.searchTerm) ||
-                participant.email.toLowerCase().includes(this.searchTerm)
-            );
-        }
-
-        // Apply category filter
-        switch (this.currentFilter) {
-            case 'top10':
-                data = data.slice(0, 10);
-                break;
-            case 'top50':
-                data = data.slice(0, 50);
-                break;
-            case 'gainers':
-                data = data.filter(p => p.pnl > 0).sort((a, b) => b.pnlPercent - a.pnlPercent);
-                break;
-            case 'losers':
-                data = data.filter(p => p.pnl < 0).sort((a, b) => a.pnlPercent - b.pnlPercent);
-                break;
-        }
+        // Use the data manager's search and filter functionality
+        let data = this.dataManager.searchAndFilter(
+            this.leaderboardData, 
+            this.searchTerm, 
+            this.currentFilter
+        );
 
         // Apply sorting
         data = this.sortData(data);
@@ -259,64 +347,192 @@ class LeaderboardManager {
         
         if (!tableBody) return;
 
-        if (this.filteredData.length === 0) {
-            tableBody.innerHTML = '';
-            if (emptyState) emptyState.style.display = 'block';
-            return;
-        }
+        try {
+            // Check for empty or invalid data
+            if (!this.filteredData || this.filteredData.length === 0) {
+                this.showTableEmptyState(tableBody, emptyState);
+                return;
+            }
 
-        if (emptyState) emptyState.style.display = 'none';
+            if (emptyState) emptyState.style.display = 'none';
 
-        const tableHTML = this.filteredData.map((participant, index) => {
-            const displayRank = this.currentFilter === 'all' ? participant.rank : index + 1;
-            const isCurrentUser = participant.isCurrentUser;
+            // Validate and sanitize data before rendering
+            const validData = this.filteredData.filter(participant => 
+                participant && 
+                typeof participant === 'object' &&
+                (participant.email || participant.username)
+            );
+
+            if (validData.length === 0) {
+                this.showTableEmptyState(tableBody, emptyState, 'No valid participant data available');
+                return;
+            }
+
+            const tableHTML = validData.map((participant, index) => {
+                try {
+                    return this.renderParticipantRow(participant, index);
+                } catch (rowError) {
+                    console.error('Error rendering participant row:', rowError, participant);
+                    return this.renderFallbackRow(participant, index);
+                }
+            }).join('');
+
+            tableBody.innerHTML = tableHTML;
             
-            return `
-                <tr class="participant-row ${isCurrentUser ? 'current-user' : ''}" data-email="${participant.email}">
-                    <td class="rank-cell">
-                        <div class="rank-number ${this.getRankClass(displayRank)}">${displayRank}</div>
-                        ${this.getRankChangeIndicator(participant)}
-                    </td>
-                    <td class="user-cell">
-                        <div class="user-info">
-                            <div class="user-avatar">
-                                ${participant.username.charAt(0).toUpperCase()}
+            // Render components with error handling
+            this.safeRenderPerformanceCharts();
+            this.safeAnimateTableRows();
+            
+        } catch (error) {
+            console.error('Error rendering leaderboard table:', error);
+            this.showTableErrorState(tableBody);
+            
+            if (this.errorHandler) {
+                this.errorHandler.handleComponentError('LeaderboardTable', error, {
+                    filteredDataLength: this.filteredData?.length || 0
+                });
+            }
+        }
+    }
+
+    /**
+     * Render individual participant row with error handling
+     */
+    renderParticipantRow(participant, index) {
+        const displayRank = this.currentFilter === 'all' ? (participant.rank || index + 1) : index + 1;
+        const isCurrentUser = participant.isCurrentUser || false;
+        
+        // Use data manager for safe display name resolution
+        const displayName = this.dataManager.resolveDisplayName(participant);
+        const avatar = this.dataManager.generateAvatar(participant);
+        
+        // Safe formatting with fallbacks
+        const portfolioValue = this.safeFormatCurrency(participant.portfolioValue);
+        const pnl = this.safeFormatCurrency(Math.abs(participant.pnl || 0));
+        const pnlPercent = this.safeFormatPercent(participant.pnlPercent);
+        const totalTrades = participant.totalTrades || 0;
+        
+        // Safe email handling
+        const email = participant.email ? this.escapeHtml(participant.email) : '';
+        
+        return `
+            <tr class="participant-row ${isCurrentUser ? 'current-user' : ''}" data-email="${email}">
+                <td class="rank-cell">
+                    <div class="rank-number ${this.getRankClass(displayRank)}">${displayRank}</div>
+                    ${this.getRankChangeIndicator(participant)}
+                </td>
+                <td class="user-cell">
+                    <div class="user-info">
+                        <div class="user-avatar">
+                            ${avatar}
+                        </div>
+                        <div class="user-details">
+                            <div class="username" title="${this.escapeHtml(displayName)}">
+                                ${this.escapeHtml(displayName)}
+                                ${isCurrentUser ? '<span class="badge bg-primary ms-2">You</span>' : ''}
                             </div>
-                            <div class="user-details">
-                                <div class="username">
-                                    ${participant.username}
-                                    ${isCurrentUser ? '<span class="badge bg-primary ms-2">You</span>' : ''}
-                                </div>
-                                <div class="join-date">Member since Jan 2024</div>
-                            </div>
+                            <div class="join-date">Member since Jan 2024</div>
                         </div>
-                    </td>
-                    <td class="portfolio-cell">₹${this.formatCurrency(participant.portfolioValue)}</td>
-                    <td class="performance-cell">
-                        <div class="performance-value ${participant.pnl >= 0 ? 'positive' : 'negative'}">
-                            ${participant.pnl >= 0 ? '+' : ''}₹${this.formatCurrency(Math.abs(participant.pnl))}
+                    </div>
+                </td>
+                <td class="portfolio-cell">₹${portfolioValue}</td>
+                <td class="performance-cell">
+                    <div class="performance-value ${(participant.pnl || 0) >= 0 ? 'positive' : 'negative'}">
+                        ${(participant.pnl || 0) >= 0 ? '+' : ''}₹${pnl}
+                    </div>
+                </td>
+                <td class="performance-cell">
+                    <div class="performance-value ${(participant.pnlPercent || 0) >= 0 ? 'positive' : 'negative'}">
+                        ${pnlPercent}
+                    </div>
+                </td>
+                <td class="trades-cell">${totalTrades}</td>
+                <td class="performance-cell">
+                    ${this.renderPerformanceChart(participant.performanceHistory, index)}
+                </td>
+            </tr>
+        `;
+    }
+
+    /**
+     * Render fallback row for corrupted data
+     */
+    renderFallbackRow(participant, index) {
+        const displayName = participant?.email || participant?.username || 'Unknown User';
+        const rank = index + 1;
+        
+        return `
+            <tr class="participant-row error-row" data-error="true">
+                <td class="rank-cell">
+                    <div class="rank-number">${rank}</div>
+                </td>
+                <td class="user-cell">
+                    <div class="user-info">
+                        <div class="user-avatar">?</div>
+                        <div class="user-details">
+                            <div class="username">${this.escapeHtml(displayName)}</div>
+                            <div class="join-date text-muted">Data unavailable</div>
                         </div>
-                    </td>
-                    <td class="performance-cell">
-                        <div class="performance-value ${participant.pnlPercent >= 0 ? 'positive' : 'negative'}">
-                            ${participant.pnlPercent >= 0 ? '+' : ''}${participant.pnlPercent.toFixed(2)}%
+                    </div>
+                </td>
+                <td class="portfolio-cell text-muted">--</td>
+                <td class="performance-cell text-muted">--</td>
+                <td class="performance-cell text-muted">--</td>
+                <td class="trades-cell text-muted">--</td>
+                <td class="performance-cell text-muted">--</td>
+            </tr>
+        `;
+    }
+
+    /**
+     * Show empty state for table
+     */
+    showTableEmptyState(tableBody, emptyState, customMessage = null) {
+        tableBody.innerHTML = '';
+        
+        if (emptyState) {
+            emptyState.style.display = 'block';
+            if (customMessage) {
+                const messageElement = emptyState.querySelector('.empty-message');
+                if (messageElement) {
+                    messageElement.textContent = customMessage;
+                }
+            }
+        } else {
+            // Create inline empty state if element doesn't exist
+            tableBody.innerHTML = `
+                <tr>
+                    <td colspan="7" class="text-center py-4">
+                        <div class="empty-state">
+                            <i class="fas fa-users fa-2x text-muted mb-3"></i>
+                            <p class="text-muted">${customMessage || 'No participants found'}</p>
+                            <button class="btn btn-primary btn-sm" onclick="leaderboardManager.retryLoadData()">
+                                <i class="fas fa-sync-alt"></i> Retry
+                            </button>
                         </div>
-                    </td>
-                    <td class="trades-cell">${participant.totalTrades}</td>
-                    <td class="performance-cell">
-                        <canvas class="performance-chart" width="60" height="20" data-history='${JSON.stringify(participant.performanceHistory)}'></canvas>
                     </td>
                 </tr>
             `;
-        }).join('');
+        }
+    }
 
-        tableBody.innerHTML = tableHTML;
-        
-        // Render mini charts
-        this.renderPerformanceCharts();
-        
-        // Add row animations
-        this.animateTableRows();
+    /**
+     * Show error state for table
+     */
+    showTableErrorState(tableBody) {
+        tableBody.innerHTML = `
+            <tr>
+                <td colspan="7" class="text-center py-4">
+                    <div class="error-state">
+                        <i class="fas fa-exclamation-triangle fa-2x text-warning mb-3"></i>
+                        <p class="text-muted">Unable to display leaderboard data</p>
+                        <button class="btn btn-primary btn-sm" onclick="leaderboardManager.retryLoadData()">
+                            <i class="fas fa-sync-alt"></i> Retry
+                        </button>
+                    </div>
+                </td>
+            </tr>
+        `;
     }
 
     renderPerformanceCharts() {
@@ -429,13 +645,17 @@ class LeaderboardManager {
         }
 
         try {
-            await this.loadLeaderboardData();
+            // Clear cache and force refresh
+            this.dataManager.clearCache();
+            this.retryCount = 0; // Reset retry count for manual refresh
+            await this.loadLeaderboardData(true);
             
             // Show success notification
             this.showNotification('Leaderboard updated successfully!', 'success');
             
         } catch (error) {
-            this.showNotification('Failed to refresh leaderboard', 'error');
+            // Error handling is already done in loadLeaderboardData
+            console.error('Refresh failed:', error);
         } finally {
             if (refreshBtn) {
                 refreshBtn.innerHTML = '<i class="fas fa-sync-alt"></i> Refresh';
@@ -500,6 +720,215 @@ class LeaderboardManager {
         } else {
             console.log(`${type.toUpperCase()}: ${message}`);
         }
+    }
+
+    /**
+     * Safe currency formatting with fallback
+     */
+    safeFormatCurrency(amount) {
+        if (typeof amount !== 'number' || isNaN(amount)) {
+            return '0';
+        }
+        
+        try {
+            return this.formatCurrency(amount);
+        } catch (error) {
+            console.error('Error formatting currency:', error);
+            return amount.toString();
+        }
+    }
+
+    /**
+     * Safe percentage formatting with fallback
+     */
+    safeFormatPercent(percent) {
+        if (typeof percent !== 'number' || isNaN(percent)) {
+            return '0.00%';
+        }
+        
+        try {
+            const sign = percent >= 0 ? '+' : '';
+            return `${sign}${percent.toFixed(2)}%`;
+        } catch (error) {
+            console.error('Error formatting percentage:', error);
+            return '0.00%';
+        }
+    }
+
+    /**
+     * Escape HTML to prevent XSS
+     */
+    escapeHtml(text) {
+        if (typeof text !== 'string') {
+            return '';
+        }
+        
+        const div = document.createElement('div');
+        div.textContent = text;
+        return div.innerHTML;
+    }
+
+    /**
+     * Render performance chart with error handling
+     */
+    renderPerformanceChart(performanceHistory, index) {
+        try {
+            if (!performanceHistory || !Array.isArray(performanceHistory) || performanceHistory.length === 0) {
+                return '<span class="text-muted">No data</span>';
+            }
+            
+            const safeHistory = performanceHistory.filter(point => 
+                point && 
+                typeof point.value === 'number' && 
+                !isNaN(point.value)
+            );
+            
+            if (safeHistory.length === 0) {
+                return '<span class="text-muted">No data</span>';
+            }
+            
+            return `<canvas class="performance-chart" width="60" height="20" data-history='${JSON.stringify(safeHistory)}' data-index="${index}"></canvas>`;
+        } catch (error) {
+            console.error('Error rendering performance chart:', error);
+            return '<span class="text-muted">Chart error</span>';
+        }
+    }
+
+    /**
+     * Safe performance chart rendering
+     */
+    safeRenderPerformanceCharts() {
+        try {
+            this.renderPerformanceCharts();
+        } catch (error) {
+            console.error('Error rendering performance charts:', error);
+            
+            if (this.errorHandler) {
+                this.errorHandler.handleComponentError('PerformanceCharts', error);
+            }
+        }
+    }
+
+    /**
+     * Safe table row animation
+     */
+    safeAnimateTableRows() {
+        try {
+            this.animateTableRows();
+        } catch (error) {
+            console.error('Error animating table rows:', error);
+            // Animation failure shouldn't break the component
+        }
+    }
+
+    /**
+     * Show retryable error with retry button
+     */
+    showRetryableError(error, retryCount) {
+        const message = `Failed to load leaderboard data (attempt ${retryCount}/${this.maxRetries}). Please try again.`;
+        
+        if (this.errorHandler) {
+            this.errorHandler.showUserError(
+                { type: this.errorHandler.errorTypes.API },
+                message,
+                [
+                    {
+                        text: 'Retry Now',
+                        action: () => this.retryLoadData()
+                    }
+                ]
+            );
+        } else {
+            this.showError(message);
+        }
+    }
+
+    /**
+     * Show fatal error with fallback options
+     */
+    showFatalError(error) {
+        const message = 'Unable to load leaderboard data. Please check your connection and refresh the page.';
+        
+        if (this.errorHandler) {
+            this.errorHandler.showUserError(
+                { type: this.errorHandler.errorTypes.CRITICAL },
+                message,
+                [
+                    {
+                        text: 'Refresh Page',
+                        action: () => window.location.reload()
+                    },
+                    {
+                        text: 'Try Again',
+                        action: () => this.retryLoadData()
+                    }
+                ]
+            );
+        } else {
+            this.showError(message);
+        }
+    }
+
+    /**
+     * Show fallback content when data is unavailable
+     */
+    showFallbackContent() {
+        // Show fallback for podium
+        const podiumContainer = document.getElementById('topPerformersPodium');
+        if (podiumContainer) {
+            this.showPodiumFallback(podiumContainer);
+        }
+
+        // Show fallback for table
+        const tableBody = document.getElementById('leaderboardTableBody');
+        const emptyState = document.getElementById('leaderboardEmpty');
+        if (tableBody) {
+            this.showTableEmptyState(tableBody, emptyState, 'Leaderboard data is currently unavailable');
+        }
+
+        // Hide other components that depend on data
+        this.hideDependentComponents();
+    }
+
+    /**
+     * Hide components that depend on leaderboard data
+     */
+    hideDependentComponents() {
+        const componentsToHide = [
+            'topGainers',
+            'topLosers',
+            'performanceTrendChart',
+            'portfolioDistributionChart'
+        ];
+
+        componentsToHide.forEach(id => {
+            const element = document.getElementById(id);
+            if (element) {
+                element.innerHTML = `
+                    <div class="text-center text-muted py-3">
+                        <i class="fas fa-chart-line"></i>
+                        <p>Data unavailable</p>
+                    </div>
+                `;
+            }
+        });
+    }
+
+    /**
+     * Hide error display
+     */
+    hideError() {
+        // Hide any existing error messages
+        const errorElements = document.querySelectorAll('.error-notification');
+        errorElements.forEach(element => element.remove());
+    }
+
+    /**
+     * Retry loading data
+     */
+    async retryLoadData() {
+        this.retryCount = 0; // Reset retry count for manual retry
+        await this.loadLeaderboardData(true); // Force refresh
     }
 
     formatCurrency(amount) {
@@ -784,50 +1213,102 @@ class LeaderboardManager {
         const container = document.getElementById('topGainers');
         if (!container) return;
 
-        const gainers = this.leaderboardData
-            .filter(p => p.pnl > 0)
-            .sort((a, b) => b.pnlPercent - a.pnlPercent)
-            .slice(0, 5);
+        try {
+            if (!this.leaderboardData || this.leaderboardData.length === 0) {
+                container.innerHTML = '<div class="text-center text-muted py-3">No data available</div>';
+                return;
+            }
 
-        const gainersHTML = gainers.map(participant => `
-            <div class="mover-item">
-                <div class="mover-info">
-                    <div class="username">${participant.username}</div>
-                    <div class="change-period">Last 24h</div>
-                </div>
-                <div class="mover-change">
-                    <div class="change-value positive">+₹${this.formatCurrency(Math.abs(participant.pnl))}</div>
-                    <div class="change-percentage">+${participant.pnlPercent.toFixed(2)}%</div>
-                </div>
-            </div>
-        `).join('');
+            const gainers = this.leaderboardData
+                .filter(p => p && typeof p.pnl === 'number' && p.pnl > 0)
+                .sort((a, b) => (b.pnlPercent || 0) - (a.pnlPercent || 0))
+                .slice(0, 5);
 
-        container.innerHTML = gainersHTML || '<div class="text-center text-muted py-3">No gainers today</div>';
+            if (gainers.length === 0) {
+                container.innerHTML = '<div class="text-center text-muted py-3">No gainers today</div>';
+                return;
+            }
+
+            const gainersHTML = gainers.map(participant => {
+                const displayName = this.dataManager.resolveDisplayName(participant);
+                const pnl = this.safeFormatCurrency(Math.abs(participant.pnl));
+                const pnlPercent = this.safeFormatPercent(participant.pnlPercent);
+                
+                return `
+                    <div class="mover-item">
+                        <div class="mover-info">
+                            <div class="username" title="${this.escapeHtml(displayName)}">${this.escapeHtml(displayName)}</div>
+                            <div class="change-period">Last 24h</div>
+                        </div>
+                        <div class="mover-change">
+                            <div class="change-value positive">+₹${pnl}</div>
+                            <div class="change-percentage">${pnlPercent}</div>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+
+            container.innerHTML = gainersHTML;
+            
+        } catch (error) {
+            console.error('Error rendering top gainers:', error);
+            container.innerHTML = '<div class="text-center text-muted py-3">Unable to load gainers</div>';
+            
+            if (this.errorHandler) {
+                this.errorHandler.handleComponentError('TopGainers', error);
+            }
+        }
     }
 
     renderTopLosers() {
         const container = document.getElementById('topLosers');
         if (!container) return;
 
-        const losers = this.leaderboardData
-            .filter(p => p.pnl < 0)
-            .sort((a, b) => a.pnlPercent - b.pnlPercent)
-            .slice(0, 5);
+        try {
+            if (!this.leaderboardData || this.leaderboardData.length === 0) {
+                container.innerHTML = '<div class="text-center text-muted py-3">No data available</div>';
+                return;
+            }
 
-        const losersHTML = losers.map(participant => `
-            <div class="mover-item">
-                <div class="mover-info">
-                    <div class="username">${participant.username}</div>
-                    <div class="change-period">Last 24h</div>
-                </div>
-                <div class="mover-change">
-                    <div class="change-value negative">-₹${this.formatCurrency(Math.abs(participant.pnl))}</div>
-                    <div class="change-percentage">${participant.pnlPercent.toFixed(2)}%</div>
-                </div>
-            </div>
-        `).join('');
+            const losers = this.leaderboardData
+                .filter(p => p && typeof p.pnl === 'number' && p.pnl < 0)
+                .sort((a, b) => (a.pnlPercent || 0) - (b.pnlPercent || 0))
+                .slice(0, 5);
 
-        container.innerHTML = losersHTML || '<div class="text-center text-muted py-3">No losers today</div>';
+            if (losers.length === 0) {
+                container.innerHTML = '<div class="text-center text-muted py-3">No losers today</div>';
+                return;
+            }
+
+            const losersHTML = losers.map(participant => {
+                const displayName = this.dataManager.resolveDisplayName(participant);
+                const pnl = this.safeFormatCurrency(Math.abs(participant.pnl));
+                const pnlPercent = this.safeFormatPercent(participant.pnlPercent);
+                
+                return `
+                    <div class="mover-item">
+                        <div class="mover-info">
+                            <div class="username" title="${this.escapeHtml(displayName)}">${this.escapeHtml(displayName)}</div>
+                            <div class="change-period">Last 24h</div>
+                        </div>
+                        <div class="mover-change">
+                            <div class="change-value negative">-₹${pnl}</div>
+                            <div class="change-percentage">${pnlPercent}</div>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+
+            container.innerHTML = losersHTML;
+            
+        } catch (error) {
+            console.error('Error rendering top losers:', error);
+            container.innerHTML = '<div class="text-center text-muted py-3">Unable to load losers</div>';
+            
+            if (this.errorHandler) {
+                this.errorHandler.handleComponentError('TopLosers', error);
+            }
+        }
     }
 
     updateCompetitionStats() {

@@ -1,0 +1,605 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cache and Performance Optimization Test</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        .container {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            margin-bottom: 20px;
+        }
+        .test-section {
+            margin-bottom: 30px;
+            padding: 15px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+        }
+        .test-section h3 {
+            margin-top: 0;
+            color: #333;
+        }
+        .status {
+            padding: 10px;
+            border-radius: 4px;
+            margin: 10px 0;
+        }
+        .status.success { background-color: #d4edda; color: #155724; }
+        .status.warning { background-color: #fff3cd; color: #856404; }
+        .status.error { background-color: #f8d7da; color: #721c24; }
+        .metrics {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin: 15px 0;
+        }
+        .metric-card {
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 5px;
+            border-left: 4px solid #007bff;
+        }
+        .metric-value {
+            font-size: 24px;
+            font-weight: bold;
+            color: #007bff;
+        }
+        .metric-label {
+            font-size: 14px;
+            color: #666;
+            margin-top: 5px;
+        }
+        button {
+            background: #007bff;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 4px;
+            cursor: pointer;
+            margin: 5px;
+        }
+        button:hover {
+            background: #0056b3;
+        }
+        button:disabled {
+            background: #6c757d;
+            cursor: not-allowed;
+        }
+        .log {
+            background: #f8f9fa;
+            border: 1px solid #dee2e6;
+            border-radius: 4px;
+            padding: 10px;
+            max-height: 300px;
+            overflow-y: auto;
+            font-family: monospace;
+            font-size: 12px;
+        }
+        .recommendations {
+            background: #e7f3ff;
+            border: 1px solid #b3d9ff;
+            border-radius: 4px;
+            padding: 15px;
+            margin: 15px 0;
+        }
+        .recommendation {
+            margin: 5px 0;
+            padding: 5px;
+            border-radius: 3px;
+        }
+        .recommendation.high { background: #ffebee; }
+        .recommendation.medium { background: #fff3e0; }
+        .recommendation.low { background: #f3e5f5; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Cache and Performance Optimization Test</h1>
+        <p>This page tests the intelligent caching, cache invalidation, performance monitoring, and memory leak prevention features.</p>
+        
+        <div class="test-section">
+            <h3>Cache Performance Manager Status</h3>
+            <div id="cacheManagerStatus" class="status">Initializing...</div>
+            <button onclick="initializeCacheManager()">Initialize Cache Manager</button>
+            <button onclick="testCacheOperations()">Test Cache Operations</button>
+            <button onclick="testCacheInvalidation()">Test Cache Invalidation</button>
+        </div>
+
+        <div class="test-section">
+            <h3>Cache Statistics</h3>
+            <div class="metrics" id="cacheMetrics">
+                <div class="metric-card">
+                    <div class="metric-value" id="totalMemoryUsage">0 MB</div>
+                    <div class="metric-label">Total Memory Usage</div>
+                </div>
+                <div class="metric-card">
+                    <div class="metric-value" id="totalEntries">0</div>
+                    <div class="metric-label">Total Cache Entries</div>
+                </div>
+                <div class="metric-card">
+                    <div class="metric-value" id="avgHitRate">0%</div>
+                    <div class="metric-label">Average Hit Rate</div>
+                </div>
+                <div class="metric-card">
+                    <div class="metric-value" id="totalEvictions">0</div>
+                    <div class="metric-label">Total Evictions</div>
+                </div>
+            </div>
+            <button onclick="updateCacheStats()">Refresh Statistics</button>
+            <button onclick="clearAllCaches()">Clear All Caches</button>
+        </div>
+
+        <div class="test-section">
+            <h3>Performance Monitoring</h3>
+            <div id="performanceStatus" class="status">Not started</div>
+            <button onclick="startPerformanceMonitoring()">Start Monitoring</button>
+            <button onclick="generatePerformanceReport()">Generate Report</button>
+            <button onclick="testMemoryOptimization()">Test Memory Optimization</button>
+        </div>
+
+        <div class="test-section">
+            <h3>Data Manager Integration</h3>
+            <div id="dataManagerStatus" class="status">Not tested</div>
+            <button onclick="testDashboardDataManager()">Test Dashboard Manager</button>
+            <button onclick="testLeaderboardDataManager()">Test Leaderboard Manager</button>
+            <button onclick="testDataRefresh()">Test Data Refresh</button>
+        </div>
+
+        <div class="test-section">
+            <h3>Performance Recommendations</h3>
+            <div id="recommendations" class="recommendations">
+                No recommendations available. Run performance tests first.
+            </div>
+        </div>
+
+        <div class="test-section">
+            <h3>Comprehensive Verification</h3>
+            <div id="verificationStatus" class="status">Ready to run verification</div>
+            <button onclick="runComprehensiveVerification()">Run Full Verification Suite</button>
+            <button onclick="showVerificationReport()">Show Last Report</button>
+        </div>
+
+        <div class="test-section">
+            <h3>Test Log</h3>
+            <div id="testLog" class="log">Test log will appear here...\n</div>
+            <button onclick="clearLog()">Clear Log</button>
+        </div>
+    </div>
+
+    <!-- Include required scripts -->
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="js/cache-performance-manager.js"></script>
+    <script src="js/performance-monitoring-integration.js"></script>
+    <script src="js/dashboard-data-manager.js"></script>
+    <script src="js/leaderboard-data-manager.js"></script>
+    <script src="js/cache-performance-verification.js"></script>
+
+    <script>
+        let cacheManager = null;
+        let performanceIntegration = null;
+        let dashboardManager = null;
+        let leaderboardManager = null;
+
+        // Utility functions
+        function log(message, type = 'info') {
+            const timestamp = new Date().toLocaleTimeString();
+            const logElement = document.getElementById('testLog');
+            const colorMap = {
+                info: '#333',
+                success: '#28a745',
+                warning: '#ffc107',
+                error: '#dc3545'
+            };
+            
+            logElement.innerHTML += `<span style="color: ${colorMap[type]}">[${timestamp}] ${message}</span>\n`;
+            logElement.scrollTop = logElement.scrollHeight;
+        }
+
+        function clearLog() {
+            document.getElementById('testLog').innerHTML = '';
+        }
+
+        function updateStatus(elementId, message, type = 'info') {
+            const element = document.getElementById(elementId);
+            element.textContent = message;
+            element.className = `status ${type}`;
+        }
+
+        // Cache Manager Tests
+        function initializeCacheManager() {
+            try {
+                cacheManager = new CachePerformanceManager();
+                window.cachePerformanceManager = cacheManager;
+                
+                updateStatus('cacheManagerStatus', 'Cache Manager initialized successfully', 'success');
+                log('Cache Performance Manager initialized', 'success');
+                
+                // Update initial stats
+                updateCacheStats();
+                
+            } catch (error) {
+                updateStatus('cacheManagerStatus', `Initialization failed: ${error.message}`, 'error');
+                log(`Cache Manager initialization failed: ${error.message}`, 'error');
+            }
+        }
+
+        function testCacheOperations() {
+            if (!cacheManager) {
+                log('Cache Manager not initialized', 'error');
+                return;
+            }
+
+            try {
+                log('Testing cache operations...', 'info');
+                
+                // Test setting data in different stores
+                const testData = {
+                    dashboard: { portfolioValue: 1250000, funds: 50000, rank: 15 },
+                    leaderboard: [
+                        { email: 'user1@test.com', portfolioValue: 1300000, rank: 1 },
+                        { email: 'user2@test.com', portfolioValue: 1250000, rank: 2 }
+                    ],
+                    users: { displayName: 'Test User', email: 'test@example.com' }
+                };
+
+                // Set data in different cache stores
+                Object.entries(testData).forEach(([store, data]) => {
+                    const success = cacheManager.set(store, `test-${store}-key`, data, {
+                        tags: ['test', store],
+                        priority: 2
+                    });
+                    
+                    if (success) {
+                        log(`✓ Successfully cached data in ${store} store`, 'success');
+                    } else {
+                        log(`✗ Failed to cache data in ${store} store`, 'error');
+                    }
+                });
+
+                // Test retrieving data
+                Object.keys(testData).forEach(store => {
+                    const retrieved = cacheManager.get(store, `test-${store}-key`);
+                    if (retrieved) {
+                        log(`✓ Successfully retrieved data from ${store} store`, 'success');
+                    } else {
+                        log(`✗ Failed to retrieve data from ${store} store`, 'error');
+                    }
+                });
+
+                updateCacheStats();
+                log('Cache operations test completed', 'success');
+                
+            } catch (error) {
+                log(`Cache operations test failed: ${error.message}`, 'error');
+            }
+        }
+
+        function testCacheInvalidation() {
+            if (!cacheManager) {
+                log('Cache Manager not initialized', 'error');
+                return;
+            }
+
+            try {
+                log('Testing cache invalidation...', 'info');
+                
+                // Test invalidation by tags
+                const invalidated = cacheManager.invalidate('dashboard', {
+                    tags: ['test']
+                });
+                log(`✓ Invalidated ${invalidated} entries by tags`, 'success');
+                
+                // Test invalidation by key pattern
+                const patternInvalidated = cacheManager.invalidate('leaderboard', {
+                    keyPattern: /test-/
+                });
+                log(`✓ Invalidated ${patternInvalidated} entries by pattern`, 'success');
+                
+                // Test invalidation by age
+                const ageInvalidated = cacheManager.invalidate('users', {
+                    maxAge: 1000 // 1 second
+                });
+                log(`✓ Invalidated ${ageInvalidated} entries by age`, 'success');
+                
+                updateCacheStats();
+                log('Cache invalidation test completed', 'success');
+                
+            } catch (error) {
+                log(`Cache invalidation test failed: ${error.message}`, 'error');
+            }
+        }
+
+        function updateCacheStats() {
+            if (!cacheManager) return;
+
+            try {
+                const stats = cacheManager.getCacheStats();
+                
+                // Update metrics display
+                document.getElementById('totalMemoryUsage').textContent = 
+                    `${(stats.totalMemoryUsage / 1024 / 1024).toFixed(2)} MB`;
+                document.getElementById('totalEntries').textContent = stats.totalEntries;
+                
+                // Calculate average hit rate
+                const stores = Object.values(stats.stores || {});
+                const avgHitRate = stores.length > 0 ? 
+                    stores.reduce((sum, store) => sum + (store.hitRate || 0), 0) / stores.length : 0;
+                document.getElementById('avgHitRate').textContent = `${(avgHitRate * 100).toFixed(1)}%`;
+                
+                // Calculate total evictions
+                const totalEvictions = stores.reduce((sum, store) => sum + (store.evictions || 0), 0);
+                document.getElementById('totalEvictions').textContent = totalEvictions;
+                
+                log('Cache statistics updated', 'info');
+                
+            } catch (error) {
+                log(`Failed to update cache stats: ${error.message}`, 'error');
+            }
+        }
+
+        function clearAllCaches() {
+            if (!cacheManager) {
+                log('Cache Manager not initialized', 'error');
+                return;
+            }
+
+            try {
+                ['dashboard', 'leaderboard', 'users', 'api', 'static'].forEach(store => {
+                    cacheManager.invalidate(store);
+                });
+                
+                updateCacheStats();
+                log('All caches cleared', 'success');
+                
+            } catch (error) {
+                log(`Failed to clear caches: ${error.message}`, 'error');
+            }
+        }
+
+        // Performance Monitoring Tests
+        function startPerformanceMonitoring() {
+            try {
+                if (!performanceIntegration) {
+                    performanceIntegration = window.performanceMonitoringIntegration;
+                }
+                
+                if (performanceIntegration && performanceIntegration.monitoringActive) {
+                    updateStatus('performanceStatus', 'Performance monitoring is active', 'success');
+                    log('Performance monitoring started', 'success');
+                } else {
+                    updateStatus('performanceStatus', 'Failed to start performance monitoring', 'error');
+                    log('Performance monitoring failed to start', 'error');
+                }
+                
+            } catch (error) {
+                updateStatus('performanceStatus', `Monitoring error: ${error.message}`, 'error');
+                log(`Performance monitoring error: ${error.message}`, 'error');
+            }
+        }
+
+        function generatePerformanceReport() {
+            if (!performanceIntegration) {
+                log('Performance integration not available', 'error');
+                return;
+            }
+
+            try {
+                const report = performanceIntegration.generatePerformanceReport();
+                log('Performance report generated (check console for details)', 'success');
+                
+                // Update recommendations
+                updateRecommendations(report.recommendations);
+                
+            } catch (error) {
+                log(`Failed to generate performance report: ${error.message}`, 'error');
+            }
+        }
+
+        function testMemoryOptimization() {
+            if (!performanceIntegration) {
+                log('Performance integration not available', 'error');
+                return;
+            }
+
+            try {
+                performanceIntegration.performMemoryOptimization();
+                log('Memory optimization performed', 'success');
+                updateCacheStats();
+                
+            } catch (error) {
+                log(`Memory optimization failed: ${error.message}`, 'error');
+            }
+        }
+
+        function updateRecommendations(recommendations) {
+            const container = document.getElementById('recommendations');
+            
+            if (!recommendations || recommendations.length === 0) {
+                container.innerHTML = 'No recommendations available. Performance is optimal.';
+                return;
+            }
+            
+            container.innerHTML = recommendations.map(rec => 
+                `<div class="recommendation ${rec.priority}">
+                    <strong>${rec.priority.toUpperCase()}:</strong> ${rec.message}
+                </div>`
+            ).join('');
+        }
+
+        // Data Manager Integration Tests
+        function testDashboardDataManager() {
+            try {
+                if (!dashboardManager) {
+                    dashboardManager = new DashboardDataManager();
+                }
+                
+                log('Testing Dashboard Data Manager integration...', 'info');
+                
+                // Test cache integration
+                const testData = { portfolioValue: 1500000, funds: 75000, rank: 10 };
+                dashboardManager.setCacheData('test-dashboard', testData, {
+                    tags: ['test', 'dashboard'],
+                    priority: 2
+                });
+                
+                const retrieved = dashboardManager.getCacheData('test-dashboard');
+                if (retrieved && retrieved.portfolioValue === testData.portfolioValue) {
+                    updateStatus('dataManagerStatus', 'Dashboard Manager integration successful', 'success');
+                    log('✓ Dashboard Data Manager cache integration working', 'success');
+                } else {
+                    updateStatus('dataManagerStatus', 'Dashboard Manager integration failed', 'error');
+                    log('✗ Dashboard Data Manager cache integration failed', 'error');
+                }
+                
+                updateCacheStats();
+                
+            } catch (error) {
+                updateStatus('dataManagerStatus', `Dashboard Manager error: ${error.message}`, 'error');
+                log(`Dashboard Manager test failed: ${error.message}`, 'error');
+            }
+        }
+
+        function testLeaderboardDataManager() {
+            try {
+                if (!leaderboardManager) {
+                    leaderboardManager = new LeaderboardDataManager();
+                }
+                
+                log('Testing Leaderboard Data Manager integration...', 'info');
+                
+                // Test user display info caching
+                const testUser = { email: 'test@example.com', username: 'TestUser' };
+                const displayInfo = leaderboardManager.getUserDisplayInfo(testUser);
+                
+                if (displayInfo && displayInfo.displayName === 'TestUser') {
+                    log('✓ Leaderboard Data Manager cache integration working', 'success');
+                } else {
+                    log('✗ Leaderboard Data Manager cache integration failed', 'error');
+                }
+                
+                updateCacheStats();
+                
+            } catch (error) {
+                log(`Leaderboard Manager test failed: ${error.message}`, 'error');
+            }
+        }
+
+        function testDataRefresh() {
+            if (!cacheManager) {
+                log('Cache Manager not initialized', 'error');
+                return;
+            }
+
+            try {
+                log('Testing data refresh functionality...', 'info');
+                
+                // Test refresh with mock fetch function
+                const mockFetchFunction = () => Promise.resolve({
+                    refreshedAt: new Date().toISOString(),
+                    data: 'Fresh data from API'
+                });
+                
+                cacheManager.refresh('api', 'test-refresh-key', mockFetchFunction, {
+                    tags: ['test', 'refresh'],
+                    priority: 1
+                }).then(result => {
+                    if (result) {
+                        log('✓ Data refresh functionality working', 'success');
+                    } else {
+                        log('✗ Data refresh functionality failed', 'error');
+                    }
+                    updateCacheStats();
+                }).catch(error => {
+                    log(`Data refresh failed: ${error.message}`, 'error');
+                });
+                
+            } catch (error) {
+                log(`Data refresh test failed: ${error.message}`, 'error');
+            }
+        }
+
+        // Initialize on page load
+        window.addEventListener('load', () => {
+            log('Cache and Performance Test page loaded', 'info');
+            
+            // Auto-initialize if managers are available
+            if (window.CachePerformanceManager) {
+                setTimeout(initializeCacheManager, 500);
+            }
+            
+            if (window.performanceMonitoringIntegration) {
+                setTimeout(startPerformanceMonitoring, 1000);
+            }
+        });
+
+        // Comprehensive verification functions
+        let lastVerificationReport = null;
+
+        async function runComprehensiveVerification() {
+            updateStatus('verificationStatus', 'Running comprehensive verification...', 'warning');
+            log('Starting comprehensive verification suite', 'info');
+            
+            try {
+                const verification = new CachePerformanceVerification();
+                lastVerificationReport = await verification.runAllTests();
+                
+                const successRate = lastVerificationReport.successRate;
+                if (successRate >= 90) {
+                    updateStatus('verificationStatus', `Verification completed: ${successRate}% success rate (Excellent)`, 'success');
+                } else if (successRate >= 75) {
+                    updateStatus('verificationStatus', `Verification completed: ${successRate}% success rate (Good)`, 'success');
+                } else {
+                    updateStatus('verificationStatus', `Verification completed: ${successRate}% success rate (Needs improvement)`, 'warning');
+                }
+                
+                log(`Comprehensive verification completed with ${successRate}% success rate`, 'success');
+                
+            } catch (error) {
+                updateStatus('verificationStatus', `Verification failed: ${error.message}`, 'error');
+                log(`Verification failed: ${error.message}`, 'error');
+            }
+        }
+
+        function showVerificationReport() {
+            if (!lastVerificationReport) {
+                log('No verification report available. Run verification first.', 'warning');
+                return;
+            }
+            
+            log('=== VERIFICATION REPORT ===', 'info');
+            log(`Total Tests: ${lastVerificationReport.totalTests}`, 'info');
+            log(`Passed: ${lastVerificationReport.passedTests}`, 'success');
+            log(`Failed: ${lastVerificationReport.failedTests}`, 'error');
+            log(`Success Rate: ${lastVerificationReport.successRate}%`, 'info');
+            
+            // Show failed tests
+            const failedTests = lastVerificationReport.results.filter(r => !r.success);
+            if (failedTests.length > 0) {
+                log('=== FAILED TESTS ===', 'error');
+                failedTests.forEach(test => {
+                    log(`❌ ${test.test}: ${test.message}`, 'error');
+                });
+            }
+            
+            log('=== END REPORT ===', 'info');
+        }
+
+        // Auto-update stats every 30 seconds
+        setInterval(() => {
+            if (cacheManager) {
+                updateCacheStats();
+            }
+        }, 30000);
+    </script>
+</body>
+</html>

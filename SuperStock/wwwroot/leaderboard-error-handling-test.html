@@ -1,0 +1,373 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Leaderboard Error Handling Test</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        .test-section {
+            margin: 20px 0;
+            padding: 20px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+        }
+        .test-result {
+            margin: 10px 0;
+            padding: 10px;
+            border-radius: 4px;
+        }
+        .test-pass {
+            background-color: #d4edda;
+            border: 1px solid #c3e6cb;
+            color: #155724;
+        }
+        .test-fail {
+            background-color: #f8d7da;
+            border: 1px solid #f5c6cb;
+            color: #721c24;
+        }
+        .error-notification {
+            margin: 10px 0;
+        }
+        .podium-fallback, .error-state, .empty-state {
+            text-align: center;
+            padding: 20px;
+            background: #f8f9fa;
+            border-radius: 8px;
+            margin: 10px 0;
+        }
+    </style>
+</head>
+<body>
+    <div class="container mt-4">
+        <h1>Leaderboard Error Handling Integration Test</h1>
+        <p class="text-muted">Testing error handling integration for task 8: Integrate Error Handling in Leaderboard</p>
+
+        <!-- Test Section 1: Enhanced Error Handler Integration -->
+        <div class="test-section">
+            <h3>1. Enhanced Error Handler Integration</h3>
+            <p>Testing if leaderboard properly integrates with the enhanced error handler.</p>
+            <button class="btn btn-primary" onclick="testErrorHandlerIntegration()">Test Error Handler Integration</button>
+            <div id="errorHandlerResult" class="test-result"></div>
+        </div>
+
+        <!-- Test Section 2: Data Manager Integration -->
+        <div class="test-section">
+            <h3>2. Data Manager Integration</h3>
+            <p>Testing proper name/email display logic using the data manager.</p>
+            <button class="btn btn-primary" onclick="testDataManagerIntegration()">Test Data Manager Integration</button>
+            <div id="dataManagerResult" class="test-result"></div>
+        </div>
+
+        <!-- Test Section 3: Error Recovery -->
+        <div class="test-section">
+            <h3>3. Error Recovery for Loading Failures</h3>
+            <p>Testing error recovery mechanisms for leaderboard loading failures.</p>
+            <button class="btn btn-primary" onclick="testErrorRecovery()">Test Error Recovery</button>
+            <div id="errorRecoveryResult" class="test-result"></div>
+        </div>
+
+        <!-- Test Section 4: Fallback Content -->
+        <div class="test-section">
+            <h3>4. Fallback Content for Missing Data</h3>
+            <p>Testing fallback content display when data is missing or corrupted.</p>
+            <button class="btn btn-primary" onclick="testFallbackContent()">Test Fallback Content</button>
+            <div id="fallbackContentResult" class="test-result"></div>
+        </div>
+
+        <!-- Test Section 5: Safe Formatting -->
+        <div class="test-section">
+            <h3>5. Safe Data Formatting</h3>
+            <p>Testing safe formatting methods for currency, percentages, and HTML escaping.</p>
+            <button class="btn btn-primary" onclick="testSafeFormatting()">Test Safe Formatting</button>
+            <div id="safeFormattingResult" class="test-result"></div>
+        </div>
+
+        <!-- Mock Leaderboard Components for Testing -->
+        <div class="test-section">
+            <h3>Mock Leaderboard Components</h3>
+            <div id="topPerformersPodium"></div>
+            <div id="leaderboardTableBody"></div>
+            <div id="leaderboardEmpty" style="display: none;">
+                <div class="empty-message">No participants found</div>
+            </div>
+            <div id="topGainers"></div>
+            <div id="topLosers"></div>
+        </div>
+    </div>
+
+    <!-- Include required scripts -->
+    <script src="js/enhanced-error-handler.js"></script>
+    <script src="js/leaderboard-data-manager.js"></script>
+    <script src="js/leaderboard.js"></script>
+
+    <script>
+        // Test functions
+        function testErrorHandlerIntegration() {
+            const resultDiv = document.getElementById('errorHandlerResult');
+            let passed = 0;
+            let total = 0;
+
+            try {
+                // Test 1: Check if error handler is initialized
+                total++;
+                if (window.leaderboardManager && window.leaderboardManager.errorHandler) {
+                    passed++;
+                    resultDiv.innerHTML += '<div class="alert alert-success">✓ Error handler properly initialized</div>';
+                } else {
+                    resultDiv.innerHTML += '<div class="alert alert-danger">✗ Error handler not initialized</div>';
+                }
+
+                // Test 2: Check error handler methods exist
+                total++;
+                const errorHandler = window.leaderboardManager.errorHandler;
+                if (errorHandler && 
+                    typeof errorHandler.handleApiError === 'function' &&
+                    typeof errorHandler.handleComponentError === 'function' &&
+                    typeof errorHandler.showUserError === 'function') {
+                    passed++;
+                    resultDiv.innerHTML += '<div class="alert alert-success">✓ Error handler methods available</div>';
+                } else {
+                    resultDiv.innerHTML += '<div class="alert alert-danger">✗ Error handler methods missing</div>';
+                }
+
+                // Test 3: Check error recovery state
+                total++;
+                if (window.leaderboardManager.retryCount !== undefined &&
+                    window.leaderboardManager.maxRetries !== undefined &&
+                    window.leaderboardManager.hasError !== undefined) {
+                    passed++;
+                    resultDiv.innerHTML += '<div class="alert alert-success">✓ Error recovery state properly initialized</div>';
+                } else {
+                    resultDiv.innerHTML += '<div class="alert alert-danger">✗ Error recovery state missing</div>';
+                }
+
+                resultDiv.innerHTML += `<div class="alert alert-info">Tests passed: ${passed}/${total}</div>`;
+            } catch (error) {
+                resultDiv.innerHTML = `<div class="alert alert-danger">Test failed: ${error.message}</div>`;
+            }
+        }
+
+        function testDataManagerIntegration() {
+            const resultDiv = document.getElementById('dataManagerResult');
+            let passed = 0;
+            let total = 0;
+
+            try {
+                const manager = window.leaderboardManager;
+                const dataManager = manager.dataManager;
+
+                // Test 1: Check data manager exists
+                total++;
+                if (dataManager) {
+                    passed++;
+                    resultDiv.innerHTML += '<div class="alert alert-success">✓ Data manager properly initialized</div>';
+                } else {
+                    resultDiv.innerHTML += '<div class="alert alert-danger">✗ Data manager not initialized</div>';
+                    return;
+                }
+
+                // Test 2: Test display name resolution
+                total++;
+                const testUser1 = { username: 'TestUser', email: 'test@example.com' };
+                const displayName1 = dataManager.resolveDisplayName(testUser1);
+                if (displayName1 === 'TestUser') {
+                    passed++;
+                    resultDiv.innerHTML += '<div class="alert alert-success">✓ Display name resolution (username priority)</div>';
+                } else {
+                    resultDiv.innerHTML += '<div class="alert alert-danger">✗ Display name resolution failed</div>';
+                }
+
+                // Test 3: Test email fallback
+                total++;
+                const testUser2 = { email: 'fallback@example.com' };
+                const displayName2 = dataManager.resolveDisplayName(testUser2);
+                if (displayName2 === 'fallback') {
+                    passed++;
+                    resultDiv.innerHTML += '<div class="alert alert-success">✓ Email fallback working</div>';
+                } else {
+                    resultDiv.innerHTML += '<div class="alert alert-danger">✗ Email fallback failed</div>';
+                }
+
+                // Test 4: Test safe formatting methods
+                total++;
+                if (typeof manager.safeFormatCurrency === 'function' &&
+                    typeof manager.safeFormatPercent === 'function' &&
+                    typeof manager.escapeHtml === 'function') {
+                    passed++;
+                    resultDiv.innerHTML += '<div class="alert alert-success">✓ Safe formatting methods available</div>';
+                } else {
+                    resultDiv.innerHTML += '<div class="alert alert-danger">✗ Safe formatting methods missing</div>';
+                }
+
+                resultDiv.innerHTML += `<div class="alert alert-info">Tests passed: ${passed}/${total}</div>`;
+            } catch (error) {
+                resultDiv.innerHTML = `<div class="alert alert-danger">Test failed: ${error.message}</div>`;
+            }
+        }
+
+        function testErrorRecovery() {
+            const resultDiv = document.getElementById('errorRecoveryResult');
+            let passed = 0;
+            let total = 0;
+
+            try {
+                const manager = window.leaderboardManager;
+
+                // Test 1: Check retry methods exist
+                total++;
+                if (typeof manager.retryLoadData === 'function' &&
+                    typeof manager.showRetryableError === 'function' &&
+                    typeof manager.showFatalError === 'function') {
+                    passed++;
+                    resultDiv.innerHTML += '<div class="alert alert-success">✓ Error recovery methods available</div>';
+                } else {
+                    resultDiv.innerHTML += '<div class="alert alert-danger">✗ Error recovery methods missing</div>';
+                }
+
+                // Test 2: Test retry state management
+                total++;
+                const initialRetryCount = manager.retryCount;
+                if (typeof initialRetryCount === 'number' && manager.maxRetries > 0) {
+                    passed++;
+                    resultDiv.innerHTML += '<div class="alert alert-success">✓ Retry state properly managed</div>';
+                } else {
+                    resultDiv.innerHTML += '<div class="alert alert-danger">✗ Retry state not properly managed</div>';
+                }
+
+                // Test 3: Test error display methods
+                total++;
+                if (typeof manager.hideError === 'function' &&
+                    typeof manager.showFallbackContent === 'function') {
+                    passed++;
+                    resultDiv.innerHTML += '<div class="alert alert-success">✓ Error display methods available</div>';
+                } else {
+                    resultDiv.innerHTML += '<div class="alert alert-danger">✗ Error display methods missing</div>';
+                }
+
+                resultDiv.innerHTML += `<div class="alert alert-info">Tests passed: ${passed}/${total}</div>`;
+            } catch (error) {
+                resultDiv.innerHTML = `<div class="alert alert-danger">Test failed: ${error.message}</div>`;
+            }
+        }
+
+        function testFallbackContent() {
+            const resultDiv = document.getElementById('fallbackContentResult');
+            let passed = 0;
+            let total = 0;
+
+            try {
+                const manager = window.leaderboardManager;
+
+                // Test 1: Test podium fallback
+                total++;
+                const podiumContainer = document.getElementById('topPerformersPodium');
+                manager.showPodiumFallback(podiumContainer);
+                if (podiumContainer.innerHTML.includes('Top Performers') && 
+                    podiumContainer.innerHTML.includes('Retry')) {
+                    passed++;
+                    resultDiv.innerHTML += '<div class="alert alert-success">✓ Podium fallback content rendered</div>';
+                } else {
+                    resultDiv.innerHTML += '<div class="alert alert-danger">✗ Podium fallback content failed</div>';
+                }
+
+                // Test 2: Test table empty state
+                total++;
+                const tableBody = document.getElementById('leaderboardTableBody');
+                const emptyState = document.getElementById('leaderboardEmpty');
+                manager.showTableEmptyState(tableBody, emptyState, 'Test message');
+                if (tableBody.innerHTML.includes('No participants found') || 
+                    emptyState.style.display === 'block') {
+                    passed++;
+                    resultDiv.innerHTML += '<div class="alert alert-success">✓ Table empty state rendered</div>';
+                } else {
+                    resultDiv.innerHTML += '<div class="alert alert-danger">✗ Table empty state failed</div>';
+                }
+
+                // Test 3: Test component fallbacks
+                total++;
+                const topGainers = document.getElementById('topGainers');
+                const topLosers = document.getElementById('topLosers');
+                manager.hideDependentComponents();
+                if (topGainers.innerHTML.includes('Data unavailable') &&
+                    topLosers.innerHTML.includes('Data unavailable')) {
+                    passed++;
+                    resultDiv.innerHTML += '<div class="alert alert-success">✓ Component fallbacks rendered</div>';
+                } else {
+                    resultDiv.innerHTML += '<div class="alert alert-danger">✗ Component fallbacks failed</div>';
+                }
+
+                resultDiv.innerHTML += `<div class="alert alert-info">Tests passed: ${passed}/${total}</div>`;
+            } catch (error) {
+                resultDiv.innerHTML = `<div class="alert alert-danger">Test failed: ${error.message}</div>`;
+            }
+        }
+
+        function testSafeFormatting() {
+            const resultDiv = document.getElementById('safeFormattingResult');
+            let passed = 0;
+            let total = 0;
+
+            try {
+                const manager = window.leaderboardManager;
+
+                // Test 1: Safe currency formatting
+                total++;
+                const currency1 = manager.safeFormatCurrency(1234567);
+                const currency2 = manager.safeFormatCurrency(null);
+                const currency3 = manager.safeFormatCurrency('invalid');
+                if (currency1.includes('1,234,567') && currency2 === '0' && currency3 === '0') {
+                    passed++;
+                    resultDiv.innerHTML += '<div class="alert alert-success">✓ Safe currency formatting works</div>';
+                } else {
+                    resultDiv.innerHTML += '<div class="alert alert-danger">✗ Safe currency formatting failed</div>';
+                }
+
+                // Test 2: Safe percentage formatting
+                total++;
+                const percent1 = manager.safeFormatPercent(25.5);
+                const percent2 = manager.safeFormatPercent(-10.2);
+                const percent3 = manager.safeFormatPercent(null);
+                if (percent1 === '+25.50%' && percent2 === '-10.20%' && percent3 === '0.00%') {
+                    passed++;
+                    resultDiv.innerHTML += '<div class="alert alert-success">✓ Safe percentage formatting works</div>';
+                } else {
+                    resultDiv.innerHTML += '<div class="alert alert-danger">✗ Safe percentage formatting failed</div>';
+                }
+
+                // Test 3: HTML escaping
+                total++;
+                const escaped1 = manager.escapeHtml('<script>alert("xss")</script>');
+                const escaped2 = manager.escapeHtml('Normal text');
+                const escaped3 = manager.escapeHtml(null);
+                if (escaped1.includes('&lt;script&gt;') && escaped2 === 'Normal text' && escaped3 === '') {
+                    passed++;
+                    resultDiv.innerHTML += '<div class="alert alert-success">✓ HTML escaping works</div>';
+                } else {
+                    resultDiv.innerHTML += '<div class="alert alert-danger">✗ HTML escaping failed</div>';
+                }
+
+                resultDiv.innerHTML += `<div class="alert alert-info">Tests passed: ${passed}/${total}</div>`;
+            } catch (error) {
+                resultDiv.innerHTML = `<div class="alert alert-danger">Test failed: ${error.message}</div>`;
+            }
+        }
+
+        // Initialize tests when page loads
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('Leaderboard Error Handling Test Page Loaded');
+            
+            // Wait a moment for leaderboard manager to initialize
+            setTimeout(() => {
+                if (window.leaderboardManager) {
+                    console.log('Leaderboard manager available for testing');
+                } else {
+                    console.error('Leaderboard manager not available');
+                }
+            }, 1000);
+        });
+    </script>
+</body>
+</html>
