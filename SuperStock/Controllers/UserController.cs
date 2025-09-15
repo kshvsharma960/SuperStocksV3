@@ -79,8 +79,7 @@ namespace SuperStock.Controllers
         [AllowAnonymous]
         [Route("authenticate")]
         [HttpPost]
-        [Authorize]
-        public ActionResult Login(UserAccountModel user)
+        public ActionResult Login([FromBody] UserAccountModel user)
         {
             var token = _userService.Authenticate(user.Email, user.Password);
             if (token == null)

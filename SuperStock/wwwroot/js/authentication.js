@@ -382,7 +382,9 @@ class AuthenticationManager {
                 
                 // Show success feedback
                 this.showFormSuccess('Login successful! Redirecting...');
-                NotificationManager.show('Welcome back! Redirecting to dashboard...', 'success');
+                if (typeof NotificationManager !== 'undefined' && NotificationManager.show) {
+                    NotificationManager.show('Welcome back! Redirecting to dashboard...', 'success');
+                }
                 
                 // Show success animation
                 this.showSuccess('Login successful!');
@@ -420,7 +422,11 @@ class AuthenticationManager {
                 
                 // Show error feedback
                 this.showFormError(errorMessage);
-                NotificationManager.show(errorMessage, 'error');
+                if (typeof NotificationManager !== 'undefined' && NotificationManager.show) {
+                    NotificationManager.show(errorMessage, 'error');
+                } else {
+                    alert(errorMessage);
+                }
                 this.shakeForm(form);
                 
                 // Mark email/password fields as invalid
@@ -434,10 +440,20 @@ class AuthenticationManager {
             
             if (error.name === 'TypeError' && error.message.includes('fetch')) {
                 errorMessage = 'Unable to connect to server. Please try again later.';
+            } else if (error.message.includes('NetworkError') || error.message.includes('Failed to fetch')) {
+                errorMessage = 'Network error. Please check your connection and try again.';
             }
             
             this.showFormError(errorMessage);
-            NotificationManager.show(errorMessage, 'error');
+            
+            // Check if NotificationManager is available
+            if (typeof NotificationManager !== 'undefined' && NotificationManager.show) {
+                NotificationManager.show(errorMessage, 'error');
+            } else {
+                // Fallback to alert if NotificationManager is not available
+                alert(errorMessage);
+            }
+            
             this.shakeForm(form);
         } finally {
             this.hideLoading(loginBtn);

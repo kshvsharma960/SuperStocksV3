@@ -18,23 +18,23 @@
 
   // Button variants
   &.btn-primary {
-    @include button-variant(var(--color-primary));
+    @include button-variant(#007bff, #ffffff);
   }
 
   &.btn-secondary {
-    @include button-variant(var(--color-secondary));
+    @include button-variant(#6c757d, #ffffff);
   }
 
   &.btn-success {
-    @include button-variant(var(--color-success));
+    @include button-variant(#28a745, #ffffff);
   }
 
   &.btn-error {
-    @include button-variant(var(--color-error));
+    @include button-variant(#dc3545, #ffffff);
   }
 
   &.btn-warning {
-    @include button-variant(var(--color-warning));
+    @include button-variant(#ffc107, #212529);
   }
 
   // Outline variants

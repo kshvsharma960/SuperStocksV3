@@ -63,7 +63,11 @@
   }
 }
 
-@mixin button-variant($bg-color, $text-color: var(--color-white), $border-color: $bg-color) {
+@mixin button-variant($bg-color: #007bff, $text-color: #ffffff, $border-color: null) {
+  @if $border-color == null {
+    $border-color: $bg-color;
+  }
+  
   background-color: $bg-color;
   color: $text-color;
   border-color: $border-color;
@@ -142,19 +146,19 @@
 }
 
 // Scrollbar Styling
-@mixin custom-scrollbar($width: 8px, $track-color: var(--color-gray-100), $thumb-color: var(--color-gray-300)) {
+@mixin custom-scrollbar($width: 8px, $track-color: #f1f3f4, $thumb-color: #d1d5db) {
   &::-webkit-scrollbar {
     width: $width;
   }
 
   &::-webkit-scrollbar-track {
     background: $track-color;
-    border-radius: var(--radius-full);
+    border-radius: 10px;
   }
 
   &::-webkit-scrollbar-thumb {
     background: $thumb-color;
-    border-radius: var(--radius-full);
+    border-radius: 10px;
 
     &:hover {
       background: darken($thumb-color, 10%);
