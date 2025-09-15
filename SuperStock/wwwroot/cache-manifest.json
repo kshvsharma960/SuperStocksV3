@@ -1,0 +1,18 @@
+﻿{
+    "dynamicAssets":  [
+                          "/Home/Index",
+                          "/Home/Leaderboard",
+                          "/api/AllStocks",
+                          "/api/AddDelete"
+                      ],
+    "staticAssets":  [
+                         "/",
+                         "/css/site.css",
+                         "/js/site.min.js",
+                         "/lib/bootstrap/dist/css/bootstrap.min.css",
+                         "/lib/bootstrap/dist/js/bootstrap.bundle.min.js",
+                         "/lib/jquery/dist/jquery.min.js"
+                     ],
+    "timestamp":  "2025-09-15 15:30:02",
+    "version":  "1.0.0"
+}

@@ -1,0 +1,230 @@
+// ==========================================================================
+// CARDS - Modern card components
+// ==========================================================================
+
+.card {
+  @include card-base;
+  padding: $card-padding;
+  margin-bottom: var(--spacing-md);
+
+  &.card-hover {
+    @include hover-lift;
+  }
+
+  // Card header
+  .card-header {
+    @include flex-between;
+    margin-bottom: var(--spacing-md);
+    padding-bottom: var(--spacing-sm);
+    border-bottom: 1px solid var(--border-color-light);
+
+    h1, h2, h3, h4, h5, h6 {
+      margin-bottom: 0;
+    }
+
+    .card-actions {
+      display: flex;
+      gap: var(--spacing-sm);
+    }
+  }
+
+  // Card body
+  .card-body {
+    flex: 1;
+  }
+
+  // Card footer
+  .card-footer {
+    margin-top: var(--spacing-md);
+    padding-top: var(--spacing-sm);
+    border-top: 1px solid var(--border-color-light);
+  }
+
+  // Card variants
+  &.card-primary {
+    border-color: var(--color-primary);
+    
+    .card-header {
+      background-color: var(--color-primary);
+      color: var(--color-white);
+      margin: calc(-1 * $card-padding) calc(-1 * $card-padding) var(--spacing-md);
+      padding: var(--spacing-md) $card-padding;
+      border-bottom: none;
+      border-radius: var(--radius-lg) var(--radius-lg) 0 0;
+    }
+  }
+
+  &.card-success {
+    border-color: var(--color-success);
+    
+    .card-header {
+      background-color: var(--color-success);
+      color: var(--color-white);
+      margin: calc(-1 * $card-padding) calc(-1 * $card-padding) var(--spacing-md);
+      padding: var(--spacing-md) $card-padding;
+      border-bottom: none;
+      border-radius: var(--radius-lg) var(--radius-lg) 0 0;
+    }
+  }
+
+  &.card-error {
+    border-color: var(--color-error);
+    
+    .card-header {
+      background-color: var(--color-error);
+      color: var(--color-white);
+      margin: calc(-1 * $card-padding) calc(-1 * $card-padding) var(--spacing-md);
+      padding: var(--spacing-md) $card-padding;
+      border-bottom: none;
+      border-radius: var(--radius-lg) var(--radius-lg) 0 0;
+    }
+  }
+
+  // Compact card
+  &.card-compact {
+    padding: var(--spacing-md);
+  }
+
+  // Borderless card
+  &.card-borderless {
+    border: none;
+    box-shadow: none;
+  }
+}
+
+// Summary cards for dashboard
+.summary-card {
+  @include card-base;
+  padding: var(--spacing-lg);
+  text-align: center;
+  position: relative;
+  overflow: hidden;
+
+  .card-icon {
+    position: absolute;
+    top: var(--spacing-md);
+    right: var(--spacing-md);
+    font-size: var(--font-size-2xl);
+    color: var(--color-gray-300);
+  }
+
+  .card-title {
+    font-size: var(--font-size-sm);
+    font-weight: var(--font-weight-medium);
+    color: var(--text-secondary);
+    margin-bottom: var(--spacing-sm);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+  }
+
+  .card-value {
+    font-size: var(--font-size-3xl);
+    font-weight: var(--font-weight-bold);
+    color: var(--text-primary);
+    margin-bottom: var(--spacing-xs);
+  }
+
+  .card-change {
+    font-size: var(--font-size-sm);
+    font-weight: var(--font-weight-medium);
+
+    &.positive {
+      color: var(--color-success);
+    }
+
+    &.negative {
+      color: var(--color-error);
+    }
+
+    &.neutral {
+      color: var(--text-muted);
+    }
+  }
+
+  // Animated background gradient
+  &::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.1), transparent);
+    transition: left 0.5s;
+  }
+
+  &:hover::before {
+    left: 100%;
+  }
+}
+
+// Portfolio card specific styles
+.portfolio-card {
+  background: linear-gradient(135deg, var(--color-primary), var(--color-primary-dark));
+  color: var(--color-white);
+  border: none;
+
+  .card-icon {
+    color: rgba(255, 255, 255, 0.3);
+  }
+
+  .card-title {
+    color: rgba(255, 255, 255, 0.9);
+  }
+
+  .card-value {
+    color: var(--color-white);
+  }
+}
+
+// Funds card specific styles
+.funds-card {
+  background: linear-gradient(135deg, var(--color-success), var(--color-success-dark));
+  color: var(--color-white);
+  border: none;
+
+  .card-icon {
+    color: rgba(255, 255, 255, 0.3);
+  }
+
+  .card-title {
+    color: rgba(255, 255, 255, 0.9);
+  }
+
+  .card-value {
+    color: var(--color-white);
+  }
+}
+
+// Rank card specific styles
+.rank-card {
+  background: linear-gradient(135deg, var(--color-warning), var(--color-warning-dark));
+  color: var(--color-white);
+  border: none;
+
+  .card-icon {
+    color: rgba(255, 255, 255, 0.3);
+  }
+
+  .card-title {
+    color: rgba(255, 255, 255, 0.9);
+  }
+
+  .card-value {
+    color: var(--color-white);
+  }
+}
+
+// Card grid layout
+.card-grid {
+  display: grid;
+  gap: var(--spacing-lg);
+  
+  @include respond-to(sm) {
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  }
+  
+  @include respond-to(lg) {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}

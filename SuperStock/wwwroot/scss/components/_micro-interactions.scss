@@ -1,0 +1,587 @@
+// Micro-Interactions and Hover Effects
+// Enhanced UI interactions, animations, and feedback states
+
+// Button Interactions
+.btn, button {
+  position: relative;
+  overflow: hidden;
+  transition: all 0.2s ease-out;
+  
+  &:not(:disabled) {
+    &.btn-hover {
+      transform: translateY(-1px);
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    }
+    
+    &.btn-clicked {
+      transform: scale(0.98);
+      transition: transform 0.1s ease-out;
+    }
+    
+    &:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    }
+    
+    &:active {
+      transform: scale(0.98);
+    }
+  }
+  
+  // Loading state
+  &.btn-loading {
+    pointer-events: none;
+    opacity: 0.8;
+    
+    .spinner-border {
+      animation: spin 1s linear infinite;
+    }
+  }
+}
+
+// Primary button enhancements
+.btn-primary {
+  background: linear-gradient(135deg, var(--primary-color), var(--primary-dark));
+  border: none;
+  
+  &:hover:not(:disabled) {
+    background: linear-gradient(135deg, var(--primary-dark), var(--primary-color));
+    box-shadow: 0 6px 20px rgba(var(--primary-rgb), 0.3);
+  }
+}
+
+// Secondary button enhancements
+.btn-outline-primary {
+  border: 2px solid var(--primary-color);
+  color: var(--primary-color);
+  background: transparent;
+  
+  &:hover:not(:disabled) {
+    background: var(--primary-color);
+    color: white;
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(var(--primary-rgb), 0.3);
+  }
+}
+
+// Ripple effect
+.ripple {
+  position: absolute;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.3);
+  transform: scale(0);
+  animation: ripple-animation 0.6s ease-out;
+  pointer-events: none;
+}
+
+@keyframes ripple-animation {
+  to {
+    transform: scale(4);
+    opacity: 0;
+  }
+}
+
+// Card Interactions
+.card, .summary-card, .watchlist-item {
+  transition: all 0.3s ease-out;
+  
+  &.card-hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
+  }
+  
+  &.card-clicked {
+    transform: scale(0.98);
+    transition: transform 0.1s ease-out;
+  }
+  
+  &[data-clickable] {
+    cursor: pointer;
+    
+    &:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
+    }
+  }
+}
+
+// Enhanced card hover effects
+.summary-card {
+  &:hover {
+    .card-icon {
+      transform: scale(1.1) rotate(5deg);
+      color: var(--primary-color);
+    }
+    
+    .value-display {
+      .amount {
+        color: var(--primary-color);
+      }
+    }
+  }
+  
+  .card-icon {
+    transition: all 0.3s ease-out;
+  }
+  
+  .amount {
+    transition: color 0.3s ease-out;
+  }
+}
+
+// Form Input Interactions
+.form-control, .form-select {
+  transition: all 0.2s ease-out;
+  border: 2px solid var(--border-color);
+  
+  &.input-focus {
+    border-color: var(--primary-color);
+    box-shadow: 0 0 0 0.2rem rgba(var(--primary-rgb), 0.25);
+    transform: scale(1.02);
+  }
+  
+  &:focus {
+    border-color: var(--primary-color);
+    box-shadow: 0 0 0 0.2rem rgba(var(--primary-rgb), 0.25);
+    transform: scale(1.02);
+  }
+  
+  &.is-valid {
+    border-color: var(--success-color);
+    animation: validPulse 0.5s ease-out;
+  }
+  
+  &.is-invalid {
+    border-color: var(--danger-color);
+    animation: invalidShake 0.5s ease-out;
+  }
+  
+  &.shake-input {
+    animation: shake 0.5s ease-out;
+  }
+}
+
+// Form group enhancements
+.form-group, .input-group {
+  &.input-focused {
+    .form-label {
+      color: var(--primary-color);
+      transform: scale(0.9);
+    }
+    
+    .input-group-text {
+      border-color: var(--primary-color);
+      background-color: rgba(var(--primary-rgb), 0.1);
+    }
+  }
+}
+
+// Floating label effects
+.form-floating {
+  &.has-value,
+  &.input-focused {
+    .form-label {
+      transform: scale(0.85) translateY(-0.5rem) translateX(0.15rem);
+      color: var(--primary-color);
+    }
+  }
+}
+
+// Table Row Interactions
+.table-row, tr {
+  transition: all 0.2s ease-out;
+  
+  &.row-hover {
+    background-color: rgba(var(--primary-rgb), 0.05);
+    transform: scale(1.01);
+  }
+  
+  &.row-selected {
+    background-color: rgba(var(--primary-rgb), 0.1);
+    border-left: 4px solid var(--primary-color);
+  }
+  
+  &.row-selecting {
+    animation: rowSelect 0.2s ease-out;
+  }
+  
+  &[data-selectable] {
+    cursor: pointer;
+  }
+}
+
+// Holdings table specific interactions
+.holdings-table {
+  .table-row {
+    &:hover {
+      .trade-btn {
+        opacity: 1;
+        transform: scale(1);
+      }
+      
+      .pnl-col {
+        .pnl-amount {
+          font-weight: 600;
+        }
+      }
+    }
+  }
+  
+  .trade-btn {
+    opacity: 0.7;
+    transform: scale(0.9);
+    transition: all 0.2s ease-out;
+  }
+}
+
+// Watchlist item interactions
+.watchlist-item {
+  &:hover {
+    .actions {
+      opacity: 1;
+      transform: translateX(0);
+    }
+    
+    .price-info {
+      .current-price {
+        font-weight: 600;
+        color: var(--primary-color);
+      }
+    }
+  }
+  
+  .actions {
+    opacity: 0.7;
+    transform: translateX(10px);
+    transition: all 0.2s ease-out;
+  }
+  
+  .current-price {
+    transition: all 0.2s ease-out;
+  }
+}
+
+// Navigation Interactions
+.nav-link, .sidebar-link {
+  position: relative;
+  transition: all 0.2s ease-out;
+  
+  &:hover {
+    color: var(--primary-color);
+    transform: translateX(5px);
+    
+    &::before {
+      width: 100%;
+    }
+  }
+  
+  &.nav-clicking {
+    transform: scale(0.95);
+  }
+  
+  &.active {
+    color: var(--primary-color);
+    
+    &::before {
+      width: 100%;
+    }
+  }
+  
+  // Animated underline
+  &::before {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    width: 0;
+    height: 2px;
+    background: var(--primary-color);
+    transition: width 0.3s ease-out;
+  }
+}
+
+// Sidebar interactions
+.sidebar {
+  transition: all 0.3s ease-out;
+  
+  &.sidebar-transitioning {
+    .sidebar-link {
+      animation: slideInLeft 0.3s ease-out;
+    }
+  }
+}
+
+.main-content {
+  transition: all 0.3s ease-out;
+  
+  &.content-transitioning {
+    animation: contentShift 0.3s ease-out;
+  }
+}
+
+// Modal Interactions
+.modal {
+  &.modal-showing {
+    .modal-dialog {
+      animation: modalSlideIn 0.3s ease-out;
+    }
+  }
+  
+  &.modal-hiding {
+    .modal-dialog {
+      animation: modalSlideOut 0.3s ease-out;
+    }
+  }
+}
+
+// Dropdown Interactions
+.dropdown-menu {
+  &.dropdown-showing {
+    animation: dropdownSlideIn 0.2s ease-out;
+  }
+  
+  &.dropdown-hiding {
+    animation: dropdownSlideOut 0.2s ease-out;
+  }
+}
+
+// Price update animations
+.price-update {
+  animation: priceFlash 0.8s ease-out;
+  
+  &.positive {
+    animation: priceFlashGreen 0.8s ease-out;
+  }
+  
+  &.negative {
+    animation: priceFlashRed 0.8s ease-out;
+  }
+}
+
+// Loading states
+.updating {
+  position: relative;
+  
+  &::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.4), transparent);
+    animation: shimmer 1s infinite;
+  }
+}
+
+// Keyboard navigation enhancements
+.keyboard-navigation {
+  *:focus {
+    outline: 2px solid var(--primary-color);
+    outline-offset: 2px;
+    border-radius: 4px;
+  }
+  
+  .btn:focus {
+    box-shadow: 0 0 0 0.2rem rgba(var(--primary-rgb), 0.5);
+  }
+}
+
+// Stagger animations
+.stagger-item {
+  opacity: 0;
+  transform: translateY(20px);
+  animation: staggerFadeIn 0.5s ease-out forwards;
+}
+
+// Notification animations
+.toast-notification {
+  animation: slideInRight 0.3s ease-out;
+  
+  &.success {
+    border-left: 4px solid var(--success-color);
+  }
+  
+  &.error {
+    border-left: 4px solid var(--danger-color);
+  }
+}
+
+// Animations
+@keyframes spin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+@keyframes shake {
+  0%, 100% { transform: translateX(0); }
+  10%, 30%, 50%, 70%, 90% { transform: translateX(-5px); }
+  20%, 40%, 60%, 80% { transform: translateX(5px); }
+}
+
+@keyframes validPulse {
+  0% { box-shadow: 0 0 0 0 rgba(var(--success-rgb), 0.7); }
+  70% { box-shadow: 0 0 0 10px rgba(var(--success-rgb), 0); }
+  100% { box-shadow: 0 0 0 0 rgba(var(--success-rgb), 0); }
+}
+
+@keyframes invalidShake {
+  0%, 100% { transform: translateX(0); }
+  10%, 30%, 50%, 70%, 90% { transform: translateX(-3px); }
+  20%, 40%, 60%, 80% { transform: translateX(3px); }
+}
+
+@keyframes rowSelect {
+  0% { background-color: rgba(var(--primary-rgb), 0.3); }
+  100% { background-color: rgba(var(--primary-rgb), 0.1); }
+}
+
+@keyframes modalSlideIn {
+  from {
+    opacity: 0;
+    transform: scale(0.8) translateY(-50px);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
+}
+
+@keyframes modalSlideOut {
+  from {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
+  to {
+    opacity: 0;
+    transform: scale(0.8) translateY(-50px);
+  }
+}
+
+@keyframes dropdownSlideIn {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes dropdownSlideOut {
+  from {
+    opacity: 1;
+    transform: translateY(0);
+  }
+  to {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+}
+
+@keyframes priceFlash {
+  0% { background-color: rgba(var(--primary-rgb), 0.3); }
+  100% { background-color: transparent; }
+}
+
+@keyframes priceFlashGreen {
+  0% { background-color: rgba(var(--success-rgb), 0.3); }
+  100% { background-color: transparent; }
+}
+
+@keyframes priceFlashRed {
+  0% { background-color: rgba(var(--danger-rgb), 0.3); }
+  100% { background-color: transparent; }
+}
+
+@keyframes shimmer {
+  0% { transform: translateX(-100%); }
+  100% { transform: translateX(100%); }
+}
+
+@keyframes slideInLeft {
+  from {
+    opacity: 0;
+    transform: translateX(-20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@keyframes contentShift {
+  0% { transform: translateX(-10px); }
+  100% { transform: translateX(0); }
+}
+
+@keyframes slideInRight {
+  from {
+    opacity: 0;
+    transform: translateX(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@keyframes staggerFadeIn {
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+// Responsive adjustments
+@media (max-width: 768px) {
+  .btn-hover,
+  .card-hover {
+    transform: none;
+    box-shadow: none;
+  }
+  
+  .table-row.row-hover {
+    transform: none;
+  }
+  
+  .nav-link:hover {
+    transform: none;
+  }
+  
+  // Reduce animations on mobile for performance
+  .ripple {
+    display: none;
+  }
+}
+
+// Reduced motion preferences
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+  
+  .ripple {
+    display: none;
+  }
+}
+
+// Dark mode adjustments
+@media (prefers-color-scheme: dark) {
+  .card-hover {
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.3);
+  }
+  
+  .btn-hover {
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+  }
+  
+  .row-hover {
+    background-color: rgba(255, 255, 255, 0.05);
+  }
+}

@@ -1,0 +1,408 @@
+// ==========================================================================
+// RESPONSIVE - Responsive utility classes
+// ==========================================================================
+
+// Display utilities for different breakpoints
+@each $breakpoint in map-keys($breakpoints) {
+  @include respond-to($breakpoint) {
+    .d-#{$breakpoint}-none { display: none !important; }
+    .d-#{$breakpoint}-block { display: block !important; }
+    .d-#{$breakpoint}-inline { display: inline !important; }
+    .d-#{$breakpoint}-inline-block { display: inline-block !important; }
+    .d-#{$breakpoint}-flex { display: flex !important; }
+    .d-#{$breakpoint}-inline-flex { display: inline-flex !important; }
+    .d-#{$breakpoint}-grid { display: grid !important; }
+  }
+}
+
+// Flexbox utilities for different breakpoints
+@each $breakpoint in map-keys($breakpoints) {
+  @include respond-to($breakpoint) {
+    .flex-#{$breakpoint}-row { flex-direction: row !important; }
+    .flex-#{$breakpoint}-column { flex-direction: column !important; }
+    .flex-#{$breakpoint}-wrap { flex-wrap: wrap !important; }
+    .flex-#{$breakpoint}-nowrap { flex-wrap: nowrap !important; }
+    
+    .justify-#{$breakpoint}-start { justify-content: flex-start !important; }
+    .justify-#{$breakpoint}-center { justify-content: center !important; }
+    .justify-#{$breakpoint}-end { justify-content: flex-end !important; }
+    .justify-#{$breakpoint}-between { justify-content: space-between !important; }
+    .justify-#{$breakpoint}-around { justify-content: space-around !important; }
+    
+    .align-#{$breakpoint}-start { align-items: flex-start !important; }
+    .align-#{$breakpoint}-center { align-items: center !important; }
+    .align-#{$breakpoint}-end { align-items: flex-end !important; }
+    .align-#{$breakpoint}-stretch { align-items: stretch !important; }
+  }
+}
+
+// Text alignment for different breakpoints
+@each $breakpoint in map-keys($breakpoints) {
+  @include respond-to($breakpoint) {
+    .text-#{$breakpoint}-left { text-align: left !important; }
+    .text-#{$breakpoint}-center { text-align: center !important; }
+    .text-#{$breakpoint}-right { text-align: right !important; }
+  }
+}
+
+// Spacing utilities for different breakpoints
+@each $breakpoint in map-keys($breakpoints) {
+  @include respond-to($breakpoint) {
+    @each $prop, $abbrev in (margin: m, padding: p) {
+      @each $size, $length in (
+        0: 0,
+        1: var(--spacing-xs),
+        2: var(--spacing-sm),
+        3: var(--spacing-md),
+        4: var(--spacing-lg),
+        5: var(--spacing-xl),
+        6: var(--spacing-2xl),
+        7: var(--spacing-3xl)
+      ) {
+        .#{$abbrev}-#{$breakpoint}-#{$size} { #{$prop}: #{$length} !important; }
+        .#{$abbrev}t-#{$breakpoint}-#{$size} { #{$prop}-top: #{$length} !important; }
+        .#{$abbrev}r-#{$breakpoint}-#{$size} { #{$prop}-right: #{$length} !important; }
+        .#{$abbrev}b-#{$breakpoint}-#{$size} { #{$prop}-bottom: #{$length} !important; }
+        .#{$abbrev}l-#{$breakpoint}-#{$size} { #{$prop}-left: #{$length} !important; }
+        .#{$abbrev}x-#{$breakpoint}-#{$size} {
+          #{$prop}-left: #{$length} !important;
+          #{$prop}-right: #{$length} !important;
+        }
+        .#{$abbrev}y-#{$breakpoint}-#{$size} {
+          #{$prop}-top: #{$length} !important;
+          #{$prop}-bottom: #{$length} !important;
+        }
+      }
+    }
+  }
+}
+
+// Width utilities for different breakpoints
+@each $breakpoint in map-keys($breakpoints) {
+  @include respond-to($breakpoint) {
+    .w-#{$breakpoint}-auto { width: auto !important; }
+    .w-#{$breakpoint}-full { width: 100% !important; }
+    .w-#{$breakpoint}-screen { width: 100vw !important; }
+    .w-#{$breakpoint}-fit { width: fit-content !important; }
+    
+    @for $i from 1 through 12 {
+      .w-#{$breakpoint}-#{$i} { width: percentage($i / 12) !important; }
+    }
+    
+    @each $size in (25, 50, 75) {
+      .w-#{$breakpoint}-#{$size} { width: percentage($size / 100) !important; }
+    }
+  }
+}
+
+// Height utilities for different breakpoints
+@each $breakpoint in map-keys($breakpoints) {
+  @include respond-to($breakpoint) {
+    .h-#{$breakpoint}-auto { height: auto !important; }
+    .h-#{$breakpoint}-full { height: 100% !important; }
+    .h-#{$breakpoint}-screen { height: 100vh !important; }
+    .h-#{$breakpoint}-fit { height: fit-content !important; }
+    
+    @each $size in (25, 50, 75) {
+      .h-#{$breakpoint}-#{$size} { height: percentage($size / 100) !important; }
+    }
+  }
+}
+
+// Grid utilities for different breakpoints
+@each $breakpoint in map-keys($breakpoints) {
+  @include respond-to($breakpoint) {
+    @for $i from 1 through 12 {
+      .col-#{$breakpoint}-#{$i} {
+        flex: 0 0 percentage($i / 12);
+        max-width: percentage($i / 12);
+      }
+    }
+    
+    .col-#{$breakpoint}-auto {
+      flex: 0 0 auto;
+      width: auto;
+      max-width: 100%;
+    }
+    
+    .col-#{$breakpoint} {
+      flex-basis: 0;
+      flex-grow: 1;
+      max-width: 100%;
+    }
+  }
+}
+
+// Order utilities for different breakpoints
+@each $breakpoint in map-keys($breakpoints) {
+  @include respond-to($breakpoint) {
+    @for $i from 0 through 12 {
+      .order-#{$breakpoint}-#{$i} { order: $i !important; }
+    }
+    
+    .order-#{$breakpoint}-first { order: -1 !important; }
+    .order-#{$breakpoint}-last { order: 13 !important; }
+  }
+}
+
+// Offset utilities for different breakpoints
+@each $breakpoint in map-keys($breakpoints) {
+  @include respond-to($breakpoint) {
+    @for $i from 0 through 11 {
+      .offset-#{$breakpoint}-#{$i} { margin-left: percentage($i / 12) !important; }
+    }
+  }
+}
+
+// Container utilities for different breakpoints
+.container-sm {
+  max-width: map-get($breakpoints, sm);
+  margin: 0 auto;
+  padding: 0 var(--spacing-lg);
+}
+
+.container-md {
+  max-width: map-get($breakpoints, md);
+  margin: 0 auto;
+  padding: 0 var(--spacing-lg);
+}
+
+.container-lg {
+  max-width: map-get($breakpoints, lg);
+  margin: 0 auto;
+  padding: 0 var(--spacing-lg);
+}
+
+.container-xl {
+  max-width: map-get($breakpoints, xl);
+  margin: 0 auto;
+  padding: 0 var(--spacing-lg);
+}
+
+.container-xxl {
+  max-width: map-get($breakpoints, xxl);
+  margin: 0 auto;
+  padding: 0 var(--spacing-lg);
+}
+
+// Responsive font sizes
+.text-responsive {
+  font-size: clamp(var(--font-size-sm), 2.5vw, var(--font-size-lg));
+}
+
+.heading-responsive {
+  font-size: clamp(var(--font-size-xl), 4vw, var(--font-size-4xl));
+}
+
+// Responsive images
+.img-responsive {
+  max-width: 100%;
+  height: auto;
+}
+
+// Mobile-first utilities
+.mobile-first {
+  @media (max-width: 767.98px) {
+    display: block !important;
+  }
+  
+  @media (min-width: 768px) {
+    display: none !important;
+  }
+}
+
+.desktop-first {
+  @media (max-width: 767.98px) {
+    display: none !important;
+  }
+  
+  @media (min-width: 768px) {
+    display: block !important;
+  }
+}
+
+// Tablet utilities
+.tablet-only {
+  @media (max-width: 767.98px) {
+    display: none !important;
+  }
+  
+  @media (min-width: 768px) and (max-width: 1199.98px) {
+    display: block !important;
+  }
+  
+  @media (min-width: 1200px) {
+    display: none !important;
+  }
+}
+
+// Touch device utilities
+.touch-device {
+  @media (hover: none) and (pointer: coarse) {
+    display: block !important;
+  }
+  
+  @media not all and (hover: none) and (pointer: coarse) {
+    display: none !important;
+  }
+}
+
+.no-touch-device {
+  @media (hover: none) and (pointer: coarse) {
+    display: none !important;
+  }
+  
+  @media not all and (hover: none) and (pointer: coarse) {
+    display: block !important;
+  }
+}
+
+// Landscape/Portrait utilities
+.landscape-only {
+  @media (orientation: portrait) {
+    display: none !important;
+  }
+}
+
+.portrait-only {
+  @media (orientation: landscape) {
+    display: none !important;
+  }
+}
+
+// High DPI utilities
+.retina-only {
+  @media (-webkit-min-device-pixel-ratio: 2), (min-resolution: 192dpi) {
+    display: block !important;
+  }
+  
+  @media not all and (-webkit-min-device-pixel-ratio: 2), not all and (min-resolution: 192dpi) {
+    display: none !important;
+  }
+}
+
+// Reduced motion utilities
+.motion-safe {
+  @media (prefers-reduced-motion: no-preference) {
+    display: block !important;
+  }
+  
+  @media (prefers-reduced-motion: reduce) {
+    display: none !important;
+  }
+}
+
+.motion-reduce {
+  @media (prefers-reduced-motion: reduce) {
+    display: block !important;
+  }
+  
+  @media (prefers-reduced-motion: no-preference) {
+    display: none !important;
+  }
+}
+
+// Dark mode utilities
+.dark-mode-only {
+  @media (prefers-color-scheme: dark) {
+    display: block !important;
+  }
+  
+  @media (prefers-color-scheme: light) {
+    display: none !important;
+  }
+}
+
+.light-mode-only {
+  @media (prefers-color-scheme: light) {
+    display: block !important;
+  }
+  
+  @media (prefers-color-scheme: dark) {
+    display: none !important;
+  }
+}
+
+// Responsive grid system
+.row {
+  display: flex;
+  flex-wrap: wrap;
+  margin-right: calc(var(--grid-gutter-width) / -2);
+  margin-left: calc(var(--grid-gutter-width) / -2);
+}
+
+.col {
+  position: relative;
+  width: 100%;
+  padding-right: calc(var(--grid-gutter-width) / 2);
+  padding-left: calc(var(--grid-gutter-width) / 2);
+}
+
+// No gutters
+.no-gutters {
+  margin-right: 0;
+  margin-left: 0;
+  
+  > .col,
+  > [class*="col-"] {
+    padding-right: 0;
+    padding-left: 0;
+  }
+}
+
+// Responsive visibility utilities (deprecated but kept for compatibility)
+.visible-xs,
+.visible-sm,
+.visible-md,
+.visible-lg,
+.visible-xl {
+  display: none !important;
+}
+
+@include respond-to(xs) {
+  .visible-xs { display: block !important; }
+}
+
+@include respond-to(sm) {
+  .visible-sm { display: block !important; }
+}
+
+@include respond-to(md) {
+  .visible-md { display: block !important; }
+}
+
+@include respond-to(lg) {
+  .visible-lg { display: block !important; }
+}
+
+@include respond-to(xl) {
+  .visible-xl { display: block !important; }
+}
+
+.hidden-xs,
+.hidden-sm,
+.hidden-md,
+.hidden-lg,
+.hidden-xl {
+  display: block !important;
+}
+
+@include respond-to(xs) {
+  .hidden-xs { display: none !important; }
+}
+
+@include respond-to(sm) {
+  .hidden-sm { display: none !important; }
+}
+
+@include respond-to(md) {
+  .hidden-md { display: none !important; }
+}
+
+@include respond-to(lg) {
+  .hidden-lg { display: none !important; }
+}
+
+@include respond-to(xl) {
+  .hidden-xl { display: none !important; }
+}

@@ -1,0 +1,80 @@
+[
+  {
+    "outputFileName": "wwwroot/css/site.min.css",
+    "inputFiles": [
+      "wwwroot/css/site.css"
+    ],
+    "minify": {
+      "enabled": true,
+      "renameLocals": true,
+      "adjustRelativePaths": true
+    },
+    "sourceMap": false
+  },
+  {
+    "outputFileName": "wwwroot/js/site.min.js",
+    "inputFiles": [
+      "wwwroot/js/lottie-manager.js",
+      "wwwroot/js/micro-interactions.js",
+      "wwwroot/js/mobile-navigation.js",
+      "wwwroot/js/swipe-gestures.js",
+      "wwwroot/js/mobile-performance.js",
+      "wwwroot/js/orientation-handler.js",
+      "wwwroot/js/modern-app.js",
+      "wwwroot/js/site.js"
+    ],
+    "minify": {
+      "enabled": false,
+      "renameLocals": false,
+      "evalTreatment": "ignore"
+    },
+    "sourceMap": false
+  },
+  {
+    "outputFileName": "wwwroot/js/dashboard.min.js",
+    "inputFiles": [
+      "wwwroot/js/stock-chart.js",
+      "wwwroot/js/dashboard.js",
+      "wwwroot/js/watchlist-search.js",
+      "wwwroot/js/modern-watchlist.js",
+      "wwwroot/js/stock-modal.js"
+    ],
+    "minify": {
+      "enabled": false,
+      "renameLocals": false,
+      "evalTreatment": "ignore"
+    },
+    "sourceMap": false
+  },
+  {
+    "outputFileName": "wwwroot/js/accessibility.min.js",
+    "inputFiles": [
+      "wwwroot/js/accessibility-manager.js",
+      "wwwroot/js/accessibility-validator.js",
+      "wwwroot/js/keyboard-navigation-tester.js",
+      "wwwroot/js/screen-reader-tester.js",
+      "wwwroot/js/accessibility-testing.js"
+    ],
+    "minify": {
+      "enabled": false,
+      "renameLocals": false,
+      "evalTreatment": "ignore"
+    },
+    "sourceMap": false
+  },
+  {
+    "outputFileName": "wwwroot/js/mobile.min.js",
+    "inputFiles": [
+      "wwwroot/js/mobile-lazy-loading.js",
+      "wwwroot/js/swipe-gestures.js",
+      "wwwroot/js/mobile-navigation.js",
+      "wwwroot/js/orientation-handler.js"
+    ],
+    "minify": {
+      "enabled": false,
+      "renameLocals": false,
+      "evalTreatment": "ignore"
+    },
+    "sourceMap": false
+  }
+]

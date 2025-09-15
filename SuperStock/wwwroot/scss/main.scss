@@ -1,0 +1,48 @@
+// ==========================================================================
+// MAIN SCSS FILE - SuperStock Modern Trading UI
+// ==========================================================================
+
+// 1. ABSTRACTS
+@import 'abstracts/variables';
+@import 'abstracts/functions';
+@import 'abstracts/mixins';
+
+// 2. BASE
+@import 'base/reset';
+@import 'base/typography';
+@import 'base/utilities';
+
+// 3. LAYOUT
+@import 'layout/header';
+@import 'layout/sidebar';
+@import 'layout/main';
+@import 'layout/footer';
+
+// 4. COMPONENTS
+@import 'components/buttons';
+@import 'components/cards';
+@import 'components/forms';
+@import 'components/modals';
+@import 'components/tables';
+@import 'components/charts';
+@import 'components/animations';
+@import 'components/notifications';
+@import 'components/lottie-animations';
+@import 'components/micro-interactions';
+@import 'components/watchlist-search';
+@import 'components/modern-watchlist';
+
+// 5. PAGES
+@import 'pages/dashboard';
+@import 'pages/login';
+@import 'pages/leaderboard';
+
+// 6. UTILITIES
+@import 'utilities/helpers';
+@import 'utilities/responsive';
+@import 'utilities/accessibility';
+@import 'utilities/mobile-first';
+@import 'utilities/touch-interactions';
+@import 'utilities/mobile-enhancements';
+@import 'utilities/orientation-adaptive';
+@import 'utilities/performance';

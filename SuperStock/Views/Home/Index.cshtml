@@ -1,177 +1,501 @@
 ﻿@{
-    ViewData["Title"] = "Super Stock";
+    ViewData["Title"] = "Dashboard - SuperStock";
 }
 
-<div class="text-center">
-    <h1 id="user" class="display-4">Welcome @User.Identity.Name</h1>
-    <p>Welcome  to Super-Stock Portal.</p>
-</div>
+<!-- Welcome Message -->
+<section class="welcome-section mobile-spacing" role="banner" aria-labelledby="welcome-title">
+    <h1 id="welcome-title" class="welcome-title heading-mobile">Welcome back, @User.Identity.Name</h1>
+    <p class="welcome-subtitle text-mobile">Here's your portfolio overview</p>
+</section>
 
-<div id="mainGrid" data-value="@ViewContext.RouteData.Values["Action"]" class="row">
-    <div id="gridHolding" class="col-lg-5 col-md-5 col-sm-5 col-xs-12 col-equal" style="text-align:center">
-        <label>Holdings</label>
-        <div id="grid">
-        </div>
-        <div id="gridFooter">
-        </div>
-    </div>
-    <div id="gridWatchList" class="col-lg-3 col-md-3 col-sm-3 col-xs-12 col-equal" style="text-align:center">
-        <label>Watch-List</label>
-        <div>
-            <div class="dropdown">
-                <select id="SearchStocks" style="width: -webkit-fill-available" class="js-data-example-ajax"></select>
+<!-- Portfolio Summary Cards -->
+<section class="dashboard-summary mobile-spacing" role="region" aria-labelledby="portfolio-summary-title">
+    <h2 id="portfolio-summary-title" class="sr-only">Portfolio Summary</h2>
+    <div class="summary-cards mobile-grid-enhanced">
+        <article class="summary-card portfolio-card card-mobile-enhanced touch-feedback haptic-light focus-within-highlight" 
+                 data-clickable="true" 
+                 data-ripple="true"
+                 tabindex="0"
+                 role="button"
+                 aria-labelledby="portfolio-value-title"
+                 aria-describedby="portfolio-value-desc">
+            <div class="card-header">
+                <div class="card-icon" aria-hidden="true">
+                    <i class="fas fa-chart-line"></i>
+                </div>
+                <div class="card-title" id="portfolio-value-title">Portfolio Value</div>
             </div>
-        </div>
-        <div id="grid2"></div>
+            <div class="card-body">
+                <div class="value-display">
+                    <span class="currency" aria-hidden="true">₹</span>
+                    <span class="amount" id="portfolioValue" aria-label="Portfolio value">0.00</span>
+                </div>
+                <div class="change-indicator" id="portfolioChange" aria-live="polite">
+                    <span class="change-value" id="portfolioChangeValue" aria-label="Change in value">+₹0.00</span>
+                    <span class="change-percent" id="portfolioChangePercent" aria-label="Percentage change">(+0.00%)</span>
+                </div>
+                <div id="portfolio-value-desc" class="sr-only">Current total value of your portfolio with change indicators</div>
+            </div>
+        </article>
+
+        <article class="summary-card funds-card card-mobile-enhanced touch-feedback haptic-light focus-within-highlight" 
+                 data-clickable="true" 
+                 data-ripple="true"
+                 tabindex="0"
+                 role="button"
+                 aria-labelledby="available-funds-title"
+                 aria-describedby="available-funds-desc">
+            <div class="card-header">
+                <div class="card-icon" aria-hidden="true">
+                    <i class="fas fa-wallet"></i>
+                </div>
+                <div class="card-title" id="available-funds-title">Available Funds</div>
+            </div>
+            <div class="card-body">
+                <div class="value-display">
+                    <span class="currency" aria-hidden="true">₹</span>
+                    <span class="amount" id="availableFunds" aria-label="Available funds">0.00</span>
+                </div>
+                <div class="fund-status" aria-live="polite">Ready to invest</div>
+                <div id="available-funds-desc" class="sr-only">Amount of money available for new investments</div>
+            </div>
+        </article>
+
+        <article class="summary-card rank-card card-mobile-enhanced touch-feedback haptic-light focus-within-highlight" 
+                 data-clickable="true" 
+                 data-ripple="true"
+                 tabindex="0"
+                 role="button"
+                 aria-labelledby="user-rank-title"
+                 aria-describedby="user-rank-desc">
+            <div class="card-header">
+                <div class="card-icon" aria-hidden="true">
+                    <i class="fas fa-trophy"></i>
+                </div>
+                <div class="card-title" id="user-rank-title">Your Rank</div>
+            </div>
+            <div class="card-body">
+                <div class="rank-display">
+                    <span class="rank-number" id="userRank" aria-label="Your current rank">1</span>
+                    <span class="rank-total">/ <span id="totalParticipants" aria-label="Total participants">1</span></span>
+                </div>
+                <div class="rank-status" aria-live="polite">Keep it up!</div>
+                <div id="user-rank-desc" class="sr-only">Your current position in the competition leaderboard</div>
+            </div>
+        </article>
     </div>
-    <div id="gridUser" class="col-lg-4 col-md-4 col-sm-4 col-xs-12 col-equal">
-        <label>User Details</label>
-        <div id="grid3">
-            <table class="table">
-                <tbody>
-                    <tr>
-                        <td>Available Funds</td>
-                        <td> : </td>
-                        <td>
-                            <div>
-                                <div class="row" id="funds">0.00</div>
-                                <p class="row smallFont">This amount is available for trade</p>
-                            </div>
-                        </td>
-                    </tr>
-                    <tr>
-                        <td>Your Rank</td>
-                        <td> : </td>
-                        <td>
-                            <div>
-                                <div class="row" id="rank">1</div>
-                                <p class="row smallFont">Out of &nbsp;<label id="totalParticipants">1</label></p>
-                            </div>
-                        </td>
-                        <td></td>
-                    </tr>
-                </tbody>
-            </table>
-        </div>
-    </div>
-</div>
-<div id="myModal" class="modal" tabindex="-1" role="dialog">
-    <div class="modal-dialog" role="document">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 id="mStock" class="modal-title">Stock</h5>
-                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                    <span aria-hidden="true">&times;</span>
+</section>
+
+<!-- Main Dashboard Content -->
+<div id="mainGrid" data-value="@ViewContext.RouteData.Values["Action"]" class="dashboard-content mobile-spacing">
+    <!-- Holdings Section -->
+    <section class="dashboard-section holdings-section mobile-spacing" role="region" aria-labelledby="holdings-title">
+        <header class="section-header">
+            <h2 class="section-title heading-mobile" id="holdings-title">
+                <i class="fas fa-briefcase" aria-hidden="true"></i>
+                Holdings
+            </h2>
+            <div class="section-actions">
+                <button class="btn btn-outline-primary btn-sm btn-touch touch-feedback mobile-hidden"
+                        aria-label="Export holdings data">
+                    <i class="fas fa-download" aria-hidden="true"></i>
+                    <span class="mobile-hidden">Export</span>
+                </button>
+                <button class="btn btn-outline-primary btn-sm btn-touch touch-feedback mobile-only" 
+                        style="display: none;"
+                        aria-label="Export holdings data">
+                    <i class="fas fa-download" aria-hidden="true"></i>
                 </button>
             </div>
+        </header>
+        <div class="holdings-container">
+            <div id="holdingsTable" 
+                 class="modern-table-container table-mobile-enhanced table-swipe-container swipeable table-accessible"
+                 role="region"
+                 aria-label="Holdings table"
+                 aria-describedby="holdings-help">
+                <!-- Holdings table will be populated here -->
+                <div id="holdings-help" class="sr-only">Use arrow keys to navigate between cells. Press Enter to interact with buttons.</div>
+            </div>
+            <div id="holdingsSummary" 
+                 class="holdings-summary"
+                 role="complementary"
+                 aria-label="Holdings summary">
+                <!-- Holdings summary will be populated here -->
+            </div>
+        </div>
+    </section>
+
+    <!-- Watchlist Section -->
+    <section class="dashboard-section watchlist-section mobile-spacing" role="region" aria-labelledby="watchlist-title">
+        <header class="section-header">
+            <h2 class="section-title heading-mobile" id="watchlist-title">
+                <i class="fas fa-eye" aria-hidden="true"></i>
+                Watchlist
+            </h2>
+            <div class="search-container search-mobile-enhanced">
+                <label for="SearchStocks" class="sr-only">Search and add stocks to watchlist</label>
+                <select id="SearchStocks" 
+                        class="stock-search-select form-control-enhanced no-zoom" 
+                        placeholder="Search stocks..."
+                        aria-label="Search and add stocks to watchlist"
+                        aria-describedby="search-stocks-help"></select>
+                <div id="search-stocks-help" class="sr-only">Type to search for stocks. Select a stock to add it to your watchlist.</div>
+            </div>
+        </header>
+        <div class="watchlist-container">
+            <div id="watchlistTable" 
+                 class="modern-table-container table-mobile-enhanced watchlist-mobile swipeable table-accessible"
+                 role="region"
+                 aria-label="Watchlist table"
+                 aria-describedby="watchlist-help">
+                <!-- Watchlist will be populated here -->
+                <div id="watchlist-help" class="sr-only">Your watchlist of stocks. Use arrow keys to navigate. Press Enter to view stock details or trade.</div>
+            </div>
+        </div>
+    </section>
+</div>
+<!-- Modern Stock Details Modal -->
+<div id="stockModal" 
+     class="modal fade stock-modal modal-mobile-enhanced stock-modal-mobile modal-orientation-adaptive" 
+     tabindex="-1" 
+     role="dialog" 
+     aria-labelledby="stockModalLabel" 
+     aria-describedby="stockModalDescription"
+     aria-hidden="true"
+     aria-modal="true">
+    <div class="modal-dialog modal-xl" role="document">
+        <div class="modal-content">
+            <header class="modal-header">
+                <div class="stock-info">
+                    <h4 class="stock-symbol" id="stockModalLabel">AAPL</h4>
+                    <span class="stock-name" id="modalStockName">Apple Inc.</span>
+                </div>
+                <button type="button" 
+                        class="btn-close touch-target touch-feedback" 
+                        data-bs-dismiss="modal" 
+                        aria-label="Close stock details modal">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </header>
+            <div id="stockModalDescription" class="sr-only">Stock details modal showing price chart, market data, and trading interface</div>
             <div class="modal-body">
-                <div><span class="badge badge-info">Current Price</span><span> &nbsp;:&nbsp;</span><span class="badge badge-info" id="mPrice">0.00</span></div>
-                <hr />
-                <div id="StockDetails" style="display:flex">
-                    <div style="width:50%">
-                        <table class="table table-light">
-                            <tr>
-                                <td class="badge badge-info">
-                                    Last Close
-                                </td>
-                                <td>
-                                    :
-                                </td>
-                                <td id="mLastClose">
-                                </td>
-                            </tr>
-                            <tr>
-                                <td class="badge badge-info">
-                                    Open Price
-                                </td>
-                                <td>
-                                    :
-                                </td>
-                                <td id="mOpen">
-                                </td>
-                            </tr>
-                        </table>
+                <div class="row">
+                    <div class="col-lg-8">
+                        <!-- Chart Container -->
+                        <section class="chart-section" role="region" aria-labelledby="chart-title">
+                            <header class="chart-header">
+                                <h5 id="chart-title">Price Chart</h5>
+                                <div class="chart-controls">
+                                    <div class="chart-type-buttons" role="group" aria-label="Chart type selection">
+                                        <button class="btn btn-sm chart-type-btn active btn-touch touch-feedback" 
+                                                data-type="candlestick" 
+                                                title="Candlestick Chart"
+                                                aria-label="Switch to candlestick chart"
+                                                aria-pressed="true">
+                                            <i class="fas fa-chart-bar" aria-hidden="true"></i>
+                                            <span class="sr-only">Candlestick</span>
+                                        </button>
+                                        <button class="btn btn-sm chart-type-btn btn-touch touch-feedback" 
+                                                data-type="line" 
+                                                title="Line Chart"
+                                                aria-label="Switch to line chart"
+                                                aria-pressed="false">
+                                            <i class="fas fa-chart-line" aria-hidden="true"></i>
+                                            <span class="sr-only">Line</span>
+                                        </button>
+                                        <button class="btn btn-sm chart-type-btn btn-touch touch-feedback" 
+                                                data-type="area" 
+                                                title="Area Chart"
+                                                aria-label="Switch to area chart"
+                                                aria-pressed="false">
+                                            <i class="fas fa-chart-area" aria-hidden="true"></i>
+                                            <span class="sr-only">Area</span>
+                                        </button>
+                                    </div>
+                                    <div class="timeframe-buttons tabs-mobile" role="group" aria-label="Chart timeframe selection">
+                                        <button class="btn btn-sm btn-outline-secondary btn-touch touch-feedback" data-timeframe="1D" aria-pressed="false">1D</button>
+                                        <button class="btn btn-sm btn-outline-secondary active btn-touch touch-feedback" data-timeframe="1W" aria-pressed="true">1W</button>
+                                        <button class="btn btn-sm btn-outline-secondary btn-touch touch-feedback" data-timeframe="1M" aria-pressed="false">1M</button>
+                                        <button class="btn btn-sm btn-outline-secondary btn-touch touch-feedback" data-timeframe="3M" aria-pressed="false">3M</button>
+                                        <button class="btn btn-sm btn-outline-secondary btn-touch touch-feedback" data-timeframe="1Y" aria-pressed="false">1Y</button>
+                                        <button class="btn btn-sm btn-outline-secondary btn-touch touch-feedback" data-timeframe="5Y" aria-pressed="false">5Y</button>
+                                    </div>
+                                    <div class="chart-actions">
+                                        <button class="btn btn-sm btn-outline-secondary" 
+                                                id="resetZoomBtn" 
+                                                title="Reset Zoom"
+                                                aria-label="Reset chart zoom to default view">
+                                            <i class="fas fa-expand-arrows-alt" aria-hidden="true"></i>
+                                            <span class="sr-only">Reset Zoom</span>
+                                        </button>
+                                    </div>
+                                </div>
+                            </header>
+                            
+                            <!-- Technical Indicators -->
+                            <div class="chart-indicators">
+                                <div class="indicators-label">Indicators:</div>
+                                <div class="indicator-buttons">
+                                    <button class="btn btn-sm indicator-btn" data-indicator="sma20">SMA 20</button>
+                                    <button class="btn btn-sm indicator-btn" data-indicator="sma50">SMA 50</button>
+                                    <button class="btn btn-sm indicator-btn" data-indicator="ema20">EMA 20</button>
+                                    <button class="btn btn-sm indicator-btn" data-indicator="bollinger">Bollinger</button>
+                                    <button class="btn btn-sm indicator-btn" data-indicator="rsi">RSI</button>
+                                    <button class="btn btn-sm indicator-btn" data-indicator="macd">MACD</button>
+                                </div>
+                                <div class="chart-options">
+                                    <label class="chart-option">
+                                        <input type="checkbox" id="realTimeUpdates" checked>
+                                        <span>Real-time Updates</span>
+                                    </label>
+                                </div>
+                            </div>
+                            
+                            <div class="chart-container chart-swipe-container swipeable pinch-zoom-enhanced chart-orientation-adaptive">
+                                <canvas id="stockChart" 
+                                        width="400" 
+                                        height="300"
+                                        role="img"
+                                        aria-label="Stock price chart"
+                                        aria-describedby="chart-description"
+                                        tabindex="0"></canvas>
+                                <div id="chart-description" class="sr-only">Interactive stock price chart. Use arrow keys to navigate data points. Press Enter for current price information.</div>
+                                <div class="chart-loading" id="chartLoading" style="display: none;" aria-live="polite">
+                                    <div class="loading-spinner">
+                                        <div class="spinner" aria-hidden="true"></div>
+                                        <span>Loading chart...</span>
+                                    </div>
+                                    <div class="sr-loading-text">Chart is loading, please wait</div>
+                                </div>
+                                <div class="chart-zoom-controls" role="group" aria-label="Chart zoom controls">
+                                    <button class="zoom-btn" 
+                                            id="zoomInBtn" 
+                                            title="Zoom In"
+                                            aria-label="Zoom in on chart">
+                                        <i class="fas fa-plus" aria-hidden="true"></i>
+                                        <span class="sr-only">Zoom In</span>
+                                    </button>
+                                    <button class="zoom-btn" 
+                                            id="zoomOutBtn" 
+                                            title="Zoom Out"
+                                            aria-label="Zoom out on chart">
+                                        <i class="fas fa-minus" aria-hidden="true"></i>
+                                        <span class="sr-only">Zoom Out</span>
+                                    </button>
+                                    <button class="zoom-btn" 
+                                            id="resetZoomBtn2" 
+                                            title="Reset Zoom"
+                                            aria-label="Reset chart zoom to default">
+                                        <i class="fas fa-expand-arrows-alt" aria-hidden="true"></i>
+                                        <span class="sr-only">Reset Zoom</span>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
                     </div>
-                    <div style="width:50%">
-                        <table class="table table-light">
-                            <tr>
-                                <td class="badge badge-info">
-                                    Today's High
-                                </td>
-                                <td>
-                                    :
-                                </td>
-                                <td id="mHigh">
-                                </td>
-                            </tr>
-                            <tr>
-                                <td class="badge badge-info">
-                                    Today's Low
-                                </td>
-                                <td>
-                                    :
-                                </td>
-                                <td id="mLow">
-                                </td>
-                            </tr>
-                        </table>
+                    <div class="col-lg-4">
+                        <!-- Trading Panel -->
+                        <div class="trading-panel">
+                            <!-- Price Display -->
+                            <div class="price-display">
+                                <div class="current-price" id="modalCurrentPrice">₹150.25</div>
+                                <div class="change" id="modalPriceChange">
+                                    <span class="change-value">+₹2.34</span>
+                                    <span class="change-percent">(+1.58%)</span>
+                                </div>
+                            </div>
+                            
+                            <!-- Market Data -->
+                            <div class="market-data">
+                                <div class="data-row">
+                                    <span class="label">Open:</span>
+                                    <span class="value" id="modalOpenPrice">₹147.50</span>
+                                </div>
+                                <div class="data-row">
+                                    <span class="label">High:</span>
+                                    <span class="value" id="modalHighPrice">₹152.00</span>
+                                </div>
+                                <div class="data-row">
+                                    <span class="label">Low:</span>
+                                    <span class="value" id="modalLowPrice">₹146.80</span>
+                                </div>
+                                <div class="data-row">
+                                    <span class="label">Prev Close:</span>
+                                    <span class="value" id="modalPrevClose">₹148.90</span>
+                                </div>
+                                <div class="data-row">
+                                    <span class="label">Volume:</span>
+                                    <span class="value" id="modalVolume">1.2M</span>
+                                </div>
+                            </div>
+                            
+                            <!-- Order Form -->
+                            <div class="order-form">
+                                <div class="order-type-tabs">
+                                    <button class="tab-btn active" data-type="buy" id="buyTab">
+                                        <i class="fas fa-arrow-up"></i>
+                                        BUY
+                                    </button>
+                                    <button class="tab-btn" data-type="sell" id="sellTab">
+                                        <i class="fas fa-arrow-down"></i>
+                                        SELL
+                                    </button>
+                                </div>
+                                
+                                <div class="form-group form-mobile">
+                                    <label for="modalQuantity">Quantity</label>
+                                    <input type="number" class="form-control form-control-enhanced no-zoom" id="modalQuantity" min="1" placeholder="Enter quantity" inputmode="numeric">
+                                    <div class="input-feedback" id="quantityFeedback"></div>
+                                </div>
+                                
+                                <div class="form-group form-mobile">
+                                    <label>Order Type</label>
+                                    <div class="order-type-switch touch-toggle">
+                                        <input type="checkbox" id="orderTypeSwitch" class="switch-input">
+                                        <label for="orderTypeSwitch" class="switch-label touch-target">
+                                            <span class="switch-text market">MARKET</span>
+                                            <span class="switch-text limit">LIMIT</span>
+                                            <span class="switch-slider"></span>
+                                        </label>
+                                    </div>
+                                </div>
+                                
+                                <div class="form-group form-mobile" id="priceGroup" style="display: none;">
+                                    <label for="modalOrderPrice">Limit Price</label>
+                                    <input type="number" class="form-control form-control-enhanced no-zoom" id="modalOrderPrice" step="0.01" placeholder="Enter price" inputmode="decimal">
+                                    <div class="input-feedback" id="priceFeedback"></div>
+                                </div>
+                                
+                                <div class="order-summary" id="orderSummary">
+                                    <div class="summary-row">
+                                        <span class="label">Estimated Value:</span>
+                                        <span class="value" id="estimatedValue">₹0.00</span>
+                                    </div>
+                                </div>
+                                
+                                <button class="btn btn-primary btn-block btn-touch-enhanced touch-feedback haptic-medium mobile-full-width" id="placeOrderBtn" disabled>
+                                    <span class="btn-text">Place Order</span>
+                                    <div class="btn-loading" style="display: none;">
+                                        <div class="spinner-sm"></div>
+                                    </div>
+                                </button>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
-            <hr />
-            <div id="inputSection">
-                <table class="table">
-                    <tr>
-                        <td>
-                            <div class="form-outline">
-                                <label class="form-label" for="typeNumber">Quantity</label>
-                                <input type="number" id="mQuantity" min="1" class="form-control" />
-                            </div>
-                        </td>
-                        <td>
-                            <div class="form-outline">
-                                <label class="form-label" for="typeNumber">Order Type</label>
-                                <input style="width:100px" type="checkbox" onchange="document.getElementById('mOrderPrice').disabled=this.checked;" data-toggle="toggle" data-on="MARKET" data-off="LIMIT" data-onstyle="danger" data-offstyle="success">
-                            </div>
-                        </td>
-                        <td id="mOrderPriceTd">
-                            <div class="form-outline">
-                                <label class="form-label" for="mOrderPrice">Trigger</label>
-                                <input type="number" id="mOrderPrice" step="0.01" class="form-control" />
-                            </div>
-                            @*<input style="width:fit-content" type="checkbox" onclick="document.getElementById('mOrderPrice').disabled=this.checked;" checked data-toggle="toggle" data-on="MARKET" data-off="LIMIT" data-onstyle="danger" data-offstyle="success">*@
-                        </td>
-                        <td>
-                            @*<input id="mOrderPrice" name="orderPrice" disabled="disabled" type="number" step="0.01">*@
-                        </td>
-                    </tr>
-                </table>
-            </div>
-            <div class="modal-footer">
-                <button id="buyButton" onclick="OnBuySell(this)" type="button" class="btn btn-primary">Buy</button>
-                <button id="sellButton" onclick="OnBuySell(this)" type="button" class="btn btn-secondary">Sell</button>
+        </div>
+    </div>
+</div>
+
+<!-- Order Confirmation Modal -->
+<div id="orderConfirmationModal" class="modal fade confirmation-modal" tabindex="-1" role="dialog">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-body">
+                <div class="confirmation-icon warning">
+                    <i class="fas fa-exclamation-triangle"></i>
+                </div>
+                <h4 class="confirmation-title">Confirm Order</h4>
+                <div class="confirmation-message">
+                    <div class="order-details" id="confirmationOrderDetails">
+                        <!-- Order details will be populated here -->
+                    </div>
+                </div>
+                <div class="confirmation-actions">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="button" class="btn btn-primary" id="confirmOrderBtn">
+                        <span class="btn-text">Confirm Order</span>
+                        <div class="btn-loading" style="display: none;">
+                            <div class="spinner-sm"></div>
+                        </div>
+                    </button>
+                </div>
             </div>
         </div>
     </div>
 </div>
-<script>
-    window.onload = function () {
-        GetRank();
-        GetHoldingsGrid();
-        GetWatchListGrid();
+@section Scripts {
+    <script>
+        // Initialize Select2 for stock search
+        function DynamicSearch() {
+            var URL = "/api/AllStocks";
+         
+            $("#SearchStocks").select2({
+                ajax: {
+                    url: URL,
+                    delay: 250,
+                    data: function (params) {
+                        var lData = {};
+                        lData.item = params.term;
+                        return lData;                
+                    },
+                    processResults: function (data, params) {
+                        params.page = params.page || 1;
+                        return {
+                            results: JSON.parse(data).Value
+                        };
+                    },
+                    cache: true
+                },
+                placeholder: 'Search for stocks...',
+                minimumInputLength: 1,
+                templateResult: formatRepo,
+                templateSelection: formatRepoSelection
+            });
+        }
 
-        setInterval(function () {
-            GetHoldingsGrid();
-            GetWatchListGrid();
-        }, 5e3);
+        function formatRepo(repo) {
+            if (repo.loading) return repo.text;
+            
+            var $container = $(
+                "<div class='select2-result-stock'>" +
+                    "<div class='stock-symbol'>" + repo.Symbol + "</div>" +
+                    "<div class='stock-actions'>" +
+                        "<span class='add-btn' onclick='AddStock(\"" + repo.Symbol + "\")'>Add to Watchlist</span>" +
+                    "</div>" +
+                "</div>"
+            );
+            return $container;
+        }
 
-        setInterval(function () {
-            GetRank();
-        }, 30e3);        
-        GetUserData();
-        setTimeout(function () {
-            $('#user').fadeOut('slow');
-        }, 2e3);
-        DynamicSearch();
-    }
-</script>
+        function formatRepoSelection(repo) {
+            return repo.Symbol || repo.text;
+        }
+
+        function AddStock(symbol) {
+            var actionData = {};
+            actionData.Stock = symbol;
+            actionData.AddDel = 1;
+            actionData.GameType = dashboard ? dashboard.getGameType() : "";
+
+            $.ajax({
+                url: "/api/AddDelete",
+                type: "GET",
+                data: (actionData),        
+                contentType: "application/json",
+                success: function (Data) {
+                    if (dashboard) {
+                        dashboard.loadWatchlistData();
+                        dashboard.showNotification(`${symbol} added to watchlist`, 'success');
+                    }
+                    // Clear the search
+                    $("#SearchStocks").val(null).trigger('change');
+                },
+                error: function (res) {
+                    if (dashboard) {
+                        dashboard.showNotification('Failed to add stock to watchlist', 'error');
+                    } else {
+                        alert("Adding failed");
+                    }
+                }
+            });
+        }
+
+        // Initialize search when page loads
+        $(document).ready(function() {
+            DynamicSearch();
+        });
+    </script>
+}

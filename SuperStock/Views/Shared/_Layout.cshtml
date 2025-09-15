@@ -2,65 +2,226 @@
 <html lang="en">
 <head>
     <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
     <title>@ViewData["Title"] - SuperStock</title>
+    <meta name="description" content="SuperStock - Modern trading platform for stock market simulation and portfolio management" />
+    
+    <!-- Modern CSS Framework -->
     <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
     <link rel="stylesheet" href="~/css/site.css" />
+    
+    <!-- Chart and Grid Libraries -->
     <link rel="stylesheet" type="text/css" href="~/css/mermaid.min.css" />
     <link href="~/lib/jsGrid/css/jsgrid-theme.min.css" rel="stylesheet" />
     <link href="~/lib/jsGrid/css/jsgrid.min.css" rel="stylesheet" />
+    
+    <!-- Enhanced UI Libraries -->
     <link href="https://cdn.jsdelivr.net/gh/gitbrent/bootstrap4-toggle@3.6.1/css/bootstrap4-toggle.min.css" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
     
+    <!-- Font Awesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+    
+    <!-- AOS Animation Library -->
+    <link href="https://unpkg.com/aos@2.3.1/dist/aos.css" rel="stylesheet">
+    
+    <!-- Lottie Web -->
+    <script src="~/lib/lottie/lottie.min.js"></script>
+    
 </head>
-<body>
-    <header>
-        <nav class="navbar navbar-expand-sm navbar-toggleable-sm navbar-light bg-white border-bottom box-shadow mb-3">
-            <div class="container">
-                <a class="navbar-brand" asp-area="" asp-controller="Home" asp-action="Index">SuperStock</a>
-                <button class="navbar-toggler" type="button" data-toggle="collapse" data-target=".navbar-collapse" aria-controls="navbarSupportedContent"
-                        aria-expanded="false" aria-label="Toggle navigation">
-                    <span class="navbar-toggler-icon"></span>
-                </button>
-                <div class="navbar-collapse collapse d-sm-inline-flex flex-sm-row-reverse">
-                    <partial name="_LoginPartial" />
-                    <ul class="navbar-nav flex-grow-1">
-                        <li class="nav-item">
-                            <a class="nav-link text-dark" asp-area="" asp-controller="Home" asp-action="Index">Home</a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link text-dark" asp-area="" asp-controller="Home" asp-action="Leaderboard">Leader Board</a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link text-dark" asp-area="" asp-controller="Home" asp-action="Competition">Competition</a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link text-dark" asp-area="" asp-controller="Home" asp-action="Privacy">Privacy</a>
-                        </li>
-                    </ul>
+<body data-page="@ViewContext.RouteData.Values["Action"]?.ToString().ToLower()"
+      class="@(User.Identity.IsAuthenticated ? "authenticated" : "guest") safe-area-insets orientation-adaptive portrait-optimize landscape-optimize"
+      data-theme="light">
+    @if (User.Identity.IsAuthenticated)
+    {
+        <!-- Sidebar Navigation -->
+        <partial name="_Sidebar" />
+        
+        <!-- Main Content Area -->
+        <div class="main-content" role="main">
+            <!-- Top Header Bar -->
+            <header class="top-header safe-area-top" role="banner">
+                <div class="header-left">
+                    <button class="sidebar-toggle mobile-menu-toggle d-lg-none touch-target" 
+                            id="sidebarToggle"
+                            aria-label="Toggle navigation menu"
+                            aria-expanded="false"
+                            aria-controls="sidebar">
+                        <div class="hamburger" aria-hidden="true">
+                            <span></span>
+                            <span></span>
+                            <span></span>
+                        </div>
+                        <span class="sr-only">Menu</span>
+                    </button>
+                    
+                    <div class="search-section search-mobile" role="search">
+                        <div class="search-container">
+                            <label for="globalSearch" class="sr-only">Search stocks and companies</label>
+                            <i class="fas fa-search search-icon" aria-hidden="true"></i>
+                            <input type="text" 
+                                   id="globalSearch"
+                                   class="search-input form-control-touch no-zoom" 
+                                   placeholder="Search stocks, companies..."
+                                   aria-label="Search stocks and companies"
+                                   aria-describedby="search-help" />
+                            <div id="search-help" class="sr-only">Type to search for stocks and companies. Use arrow keys to navigate results.</div>
+                            <div class="search-results" 
+                                 style="display: none;"
+                                 role="listbox"
+                                 aria-label="Search results"></div>
+                        </div>
+                    </div>
                 </div>
-            </div>
-        </nav>
-    </header>
-    <div class="container">
-        <main role="main" class="pb-3">
-            @RenderBody()
-        </main>
-    </div>
-
-    <footer class="border-top footer text-muted">
-        <div class="container">
-            &copy; 2021 - SuperStock - <a asp-area="" asp-controller="Home" asp-action="Privacy">Privacy</a>
+                
+                <div class="header-right">
+                    <nav class="header-actions" role="navigation" aria-label="User actions">
+                        <button class="action-btn theme-toggle touch-target touch-feedback" 
+                                title="Toggle Theme"
+                                aria-label="Toggle between light and dark theme">
+                            <i class="fas fa-moon" aria-hidden="true"></i>
+                            <span class="sr-only">Toggle Theme</span>
+                        </button>
+                        
+                        <button class="action-btn notification-btn touch-target touch-feedback" 
+                                title="Notifications"
+                                aria-label="Notifications (3 unread)"
+                                aria-describedby="notification-count">
+                            <i class="fas fa-bell" aria-hidden="true"></i>
+                            <span class="notification-badge" id="notification-count" aria-label="3 unread notifications">3</span>
+                        </button>
+                        
+                        <div class="user-profile-dropdown dropdown-mobile">
+                            <button class="user-profile-btn touch-target touch-feedback" 
+                                    data-bs-toggle="dropdown"
+                                    aria-label="User menu for @User.Identity.Name"
+                                    aria-expanded="false"
+                                    aria-haspopup="true">
+                                <div class="user-avatar" aria-hidden="true">
+                                    <i class="fas fa-user"></i>
+                                </div>
+                                <span class="user-name mobile-hidden">@User.Identity.Name</span>
+                                <i class="fas fa-chevron-down dropdown-arrow mobile-hidden" aria-hidden="true"></i>
+                            </button>
+                            <ul class="dropdown-menu dropdown-menu-end" role="menu" aria-label="User menu">
+                                <li role="none"><a class="dropdown-item touch-target" href="#" role="menuitem"><i class="fas fa-user-circle" aria-hidden="true"></i> Profile</a></li>
+                                <li role="none"><a class="dropdown-item touch-target" href="#" role="menuitem"><i class="fas fa-cog" aria-hidden="true"></i> Settings</a></li>
+                                <li role="none"><hr class="dropdown-divider"></li>
+                                <li role="none"><a class="dropdown-item touch-target" href="@Url.Action("Logout", "User")" role="menuitem"><i class="fas fa-sign-out-alt" aria-hidden="true"></i> Logout</a></li>
+                            </ul>
+                        </div>
+                    </nav>
+                </div>
+            </header>
+            
+            <!-- Page Content -->
+            <main class="page-content safe-area-bottom" id="main-content" role="main" tabindex="-1">
+                <div class="content-wrapper container-mobile">
+                    @RenderBody()
+                </div>
+            </main>
         </div>
-    </footer>
+    }
+    else
+    {
+        <!-- Guest Layout (Login/Register pages) -->
+        <div class="guest-layout">
+            <header class="guest-header" role="banner">
+                <div class="container">
+                    <a class="brand-logo" 
+                       asp-area="" 
+                       asp-controller="Home" 
+                       asp-action="Index"
+                       aria-label="SuperStock - Go to homepage">
+                        <i class="fas fa-chart-line" aria-hidden="true"></i>
+                        <span>SuperStock</span>
+                    </a>
+                </div>
+            </header>
+            
+            <main class="guest-content" id="main-content" role="main" tabindex="-1">
+                @RenderBody()
+            </main>
+        </div>
+    }
 
+    @if (User.Identity.IsAuthenticated)
+    {
+        <!-- Footer for authenticated users -->
+        <footer class="main-footer" role="contentinfo">
+            <div class="footer-content">
+                <div class="footer-left">
+                    <span>&copy; 2024 SuperStock. All rights reserved.</span>
+                </div>
+                <nav class="footer-right" role="navigation" aria-label="Footer links">
+                    <a href="@Url.Action("Privacy", "Home")" class="footer-link">Privacy Policy</a>
+                    <a href="#" class="footer-link">Terms of Service</a>
+                    <a href="#" class="footer-link">Support</a>
+                </nav>
+            </div>
+        </footer>
+    }
+
+    <!-- Core JavaScript Libraries -->
     <script src="~/lib/jquery/dist/jquery.min.js"></script>
     <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+    
+    <!-- Enhanced UI Libraries -->
     <script src="https://cdn.jsdelivr.net/gh/gitbrent/bootstrap4-toggle@3.6.1/js/bootstrap4-toggle.min.js"></script>
     <script src="~/lib/jsGrid/js/jsgrid.min.js"></script>
     <script src="~/js/gridjs.production.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
+    
+    <!-- Animation Libraries -->
+    <script src="https://unpkg.com/aos@2.3.1/dist/aos.js"></script>
+    
+    <!-- Chart Libraries -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chartjs-adapter-date-fns/dist/chartjs-adapter-date-fns.bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chartjs-chart-financial"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-zoom"></script>
+    
+    <!-- Lottie Animation Manager -->
+    <script src="~/js/lottie-manager.js" asp-append-version="true"></script>
+    
+    <!-- Micro-Interactions Manager -->
+    <script src="~/js/micro-interactions.js" asp-append-version="true"></script>
+    
+    <!-- Mobile Navigation and Touch Gestures -->
+    <script src="~/js/mobile-navigation.js" asp-append-version="true"></script>
+    <script src="~/js/swipe-gestures.js" asp-append-version="true"></script>
+    <script src="~/js/mobile-performance.js" asp-append-version="true"></script>
+    <script src="~/js/orientation-handler.js" asp-append-version="true"></script>
+    
+    <!-- Accessibility Manager -->
+    <script src="~/js/accessibility-manager.js" asp-append-version="true"></script>
+    
+    <!-- Performance Optimization -->
+    <script src="~/js/performance-optimizer.js" asp-append-version="true"></script>
+    <script src="~/js/sw-registration.js" asp-append-version="true"></script>
+    <script src="~/js/performance-monitor.js" asp-append-version="true"></script>
+    
+    <!-- Cross-Browser Testing and UI Refinements -->
+    <script src="~/js/browser-compatibility.js" asp-append-version="true"></script>
+    <script src="~/js/lighthouse-integration.js" asp-append-version="true"></script>
+    <script src="~/js/final-ui-refinements.js" asp-append-version="true"></script>
+    <script src="~/js/cross-browser-testing.js" asp-append-version="true"></script>
+    <script src="~/js/testing-dashboard.js" asp-append-version="true"></script>
+    <script src="~/js/test-verification.js" asp-append-version="true"></script>
+    
+    <!-- Modern App JavaScript -->
+    <script src="~/js/modern-app.js" asp-append-version="true"></script>
     <script src="~/js/site.js" asp-append-version="true"></script>
+    
+    @if (User.Identity.IsAuthenticated && ViewContext.RouteData.Values["Action"]?.ToString() == "Index")
+    {
+        <script src="~/js/stock-chart.js" asp-append-version="true"></script>
+        <script src="~/js/dashboard.js" asp-append-version="true"></script>
+        <script src="~/js/watchlist-search.js" asp-append-version="true"></script>
+        <script src="~/js/modern-watchlist.js" asp-append-version="true"></script>
+        <script src="~/js/stock-modal.js" asp-append-version="true"></script>
+    }
+    
     @RenderSection("Scripts", required: false)
 </body>
 </html>

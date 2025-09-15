@@ -1,0 +1,289 @@
+// Lottie Animation Styles
+// Provides styling for Lottie-based loading states, feedback animations, and empty states
+
+.lottie-loading-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+  
+  .lottie-animation {
+    flex-shrink: 0;
+  }
+  
+  .lottie-text {
+    margin-top: 12px;
+    color: var(--text-muted);
+    font-size: 14px;
+    text-align: center;
+    animation: pulse 2s ease-in-out infinite;
+  }
+}
+
+.lottie-feedback {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+  text-align: center;
+  
+  .lottie-animation {
+    flex-shrink: 0;
+    margin-bottom: 12px;
+  }
+  
+  .feedback-message {
+    font-size: 14px;
+    font-weight: 500;
+    animation: fadeInUp 0.3s ease-out;
+  }
+  
+  &.lottie-success .feedback-message {
+    color: var(--success-color);
+  }
+  
+  &.lottie-error .feedback-message {
+    color: var(--danger-color);
+  }
+}
+
+.lottie-empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 40px 20px;
+  text-align: center;
+  
+  .lottie-animation {
+    flex-shrink: 0;
+    margin-bottom: 20px;
+    opacity: 0.8;
+  }
+  
+  .empty-state-title {
+    margin: 0 0 8px 0;
+    color: var(--text-primary);
+    font-size: 18px;
+    font-weight: 600;
+    animation: fadeInUp 0.4s ease-out;
+  }
+  
+  .empty-state-message {
+    margin: 0 0 20px 0;
+    color: var(--text-muted);
+    font-size: 14px;
+    line-height: 1.5;
+    max-width: 300px;
+    animation: fadeInUp 0.4s ease-out 0.1s both;
+  }
+  
+  .btn {
+    animation: fadeInUp 0.4s ease-out 0.2s both;
+  }
+}
+
+.lottie-loading-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(255, 255, 255, 0.9);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 9999;
+  backdrop-filter: blur(2px);
+  animation: fadeIn 0.3s ease-out;
+  
+  > div {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 30px;
+    background: white;
+    border-radius: 12px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+    animation: scaleIn 0.3s ease-out;
+    
+    .lottie-animation {
+      flex-shrink: 0;
+    }
+    
+    > div:last-child {
+      margin-top: 16px;
+      color: var(--text-primary);
+      font-size: 16px;
+      font-weight: 500;
+    }
+  }
+}
+
+// Loading skeleton for tables and cards
+.lottie-skeleton {
+  .skeleton-row {
+    display: flex;
+    align-items: center;
+    padding: 12px 0;
+    
+    &:not(:last-child) {
+      border-bottom: 1px solid var(--border-color);
+    }
+  }
+  
+  .skeleton-item {
+    background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
+    background-size: 200% 100%;
+    animation: loading 1.5s infinite;
+    border-radius: 4px;
+    
+    &.skeleton-avatar {
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      margin-right: 12px;
+    }
+    
+    &.skeleton-text {
+      height: 16px;
+      flex: 1;
+      margin-right: 12px;
+      
+      &.short {
+        flex: 0.3;
+      }
+      
+      &.medium {
+        flex: 0.6;
+      }
+    }
+    
+    &.skeleton-number {
+      width: 80px;
+      height: 16px;
+    }
+  }
+}
+
+// Micro-interaction animations
+.lottie-micro-interaction {
+  .hover-scale {
+    transition: transform 0.2s ease-out;
+    
+    &:hover {
+      transform: scale(1.05);
+    }
+  }
+  
+  .hover-lift {
+    transition: transform 0.2s ease-out, box-shadow 0.2s ease-out;
+    
+    &:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    }
+  }
+  
+  .click-feedback {
+    transition: transform 0.1s ease-out;
+    
+    &:active {
+      transform: scale(0.98);
+    }
+  }
+}
+
+// Animations
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes scaleIn {
+  from {
+    opacity: 0;
+    transform: scale(0.9);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+@keyframes pulse {
+  0%, 100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.5;
+  }
+}
+
+@keyframes loading {
+  0% {
+    background-position: 200% 0;
+  }
+  100% {
+    background-position: -200% 0;
+  }
+}
+
+// Responsive adjustments
+@media (max-width: 768px) {
+  .lottie-loading-overlay > div {
+    margin: 20px;
+    padding: 20px;
+  }
+  
+  .lottie-empty-state {
+    padding: 30px 15px;
+    
+    .lottie-animation {
+      width: 100px !important;
+      height: 100px !important;
+    }
+    
+    .empty-state-title {
+      font-size: 16px;
+    }
+    
+    .empty-state-message {
+      font-size: 13px;
+    }
+  }
+}
+
+// Dark mode support
+@media (prefers-color-scheme: dark) {
+  .lottie-loading-overlay {
+    background: rgba(0, 0, 0, 0.8);
+    
+    > div {
+      background: var(--dark-bg, #2d3748);
+      color: var(--dark-text, #e2e8f0);
+    }
+  }
+  
+  .lottie-skeleton .skeleton-item {
+    background: linear-gradient(90deg, #4a5568 25%, #2d3748 50%, #4a5568 75%);
+    background-size: 200% 100%;
+  }
+}

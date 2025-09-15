@@ -1,0 +1,508 @@
+/**
+ * Accessibility Utilities
+ * Comprehensive accessibility support including focus indicators, screen reader support, and high contrast mode
+ */
+
+// Screen reader only content
+.sr-only {
+    position: absolute !important;
+    width: 1px !important;
+    height: 1px !important;
+    padding: 0 !important;
+    margin: -1px !important;
+    overflow: hidden !important;
+    clip: rect(0, 0, 0, 0) !important;
+    white-space: nowrap !important;
+    border: 0 !important;
+}
+
+.sr-only-focusable:focus,
+.sr-only-focusable:active {
+    position: static !important;
+    width: auto !important;
+    height: auto !important;
+    padding: inherit !important;
+    margin: inherit !important;
+    overflow: visible !important;
+    clip: auto !important;
+    white-space: inherit !important;
+}
+
+// Skip links for keyboard navigation
+.skip-links {
+    position: absolute;
+    top: -100px;
+    left: 0;
+    z-index: 9999;
+    
+    .skip-link {
+        position: absolute;
+        top: 0;
+        left: 0;
+        background: var(--bs-primary);
+        color: white;
+        padding: 0.5rem 1rem;
+        text-decoration: none;
+        border-radius: 0 0 0.25rem 0;
+        font-weight: 600;
+        transition: top 0.2s ease;
+        
+        &:focus {
+            top: 100px;
+            outline: 3px solid var(--bs-warning);
+            outline-offset: 2px;
+        }
+        
+        &:hover {
+            background: var(--bs-primary-dark, darken(var(--bs-primary), 10%));
+        }
+    }
+}
+
+// Enhanced focus indicators
+.keyboard-navigation {
+    // Enhanced focus styles for keyboard navigation
+    *:focus {
+        outline: 3px solid var(--focus-color, #005fcc) !important;
+        outline-offset: 2px !important;
+        box-shadow: 0 0 0 1px rgba(0, 95, 204, 0.2) !important;
+    }
+    
+    // Special focus styles for different elements
+    button:focus,
+    .btn:focus {
+        outline-color: var(--btn-focus-color, #005fcc) !important;
+        box-shadow: 0 0 0 3px rgba(0, 95, 204, 0.25) !important;
+    }
+    
+    input:focus,
+    select:focus,
+    textarea:focus {
+        outline-color: var(--input-focus-color, #0066cc) !important;
+        border-color: var(--input-focus-border, #0066cc) !important;
+        box-shadow: 0 0 0 2px rgba(0, 102, 204, 0.25) !important;
+    }
+    
+    a:focus {
+        outline-color: var(--link-focus-color, #0066cc) !important;
+        background-color: rgba(0, 102, 204, 0.1) !important;
+        border-radius: 2px;
+    }
+    
+    .nav-link:focus {
+        background-color: rgba(var(--bs-primary-rgb), 0.1) !important;
+        outline-color: var(--bs-primary) !important;
+    }
+    
+    .card:focus {
+        outline-color: var(--bs-primary) !important;
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15), 0 0 0 3px rgba(var(--bs-primary-rgb), 0.25) !important;
+    }
+    
+    .table td:focus,
+    .table th:focus,
+    [role="gridcell"]:focus,
+    [role="columnheader"]:focus {
+        outline: 2px solid var(--bs-primary) !important;
+        outline-offset: -2px !important;
+        background-color: rgba(var(--bs-primary-rgb), 0.1) !important;
+    }
+}
+
+// Remove focus styles for mouse navigation
+.mouse-navigation {
+    *:focus:not(:focus-visible) {
+        outline: none !important;
+        box-shadow: none !important;
+    }
+}
+
+// High contrast mode support
+@media (prefers-contrast: high) {
+    :root {
+        --bs-body-bg: #ffffff;
+        --bs-body-color: #000000;
+        --bs-primary: #0000ff;
+        --bs-secondary: #666666;
+        --bs-success: #008000;
+        --bs-danger: #ff0000;
+        --bs-warning: #ffff00;
+        --bs-info: #00ffff;
+        --bs-border-color: #000000;
+    }
+    
+    .card {
+        border: 2px solid #000000 !important;
+        background: #ffffff !important;
+        color: #000000 !important;
+    }
+    
+    .btn {
+        border: 2px solid #000000 !important;
+        font-weight: bold !important;
+    }
+    
+    .btn-primary {
+        background: #0000ff !important;
+        color: #ffffff !important;
+    }
+    
+    .btn-secondary {
+        background: #666666 !important;
+        color: #ffffff !important;
+    }
+    
+    .table {
+        border: 2px solid #000000 !important;
+        
+        th, td {
+            border: 1px solid #000000 !important;
+        }
+    }
+    
+    .sidebar {
+        border-right: 3px solid #000000 !important;
+        background: #ffffff !important;
+    }
+    
+    .nav-link {
+        color: #000000 !important;
+        
+        &.active {
+            background: #0000ff !important;
+            color: #ffffff !important;
+        }
+    }
+}
+
+// Reduced motion support
+@media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+        scroll-behavior: auto !important;
+    }
+    
+    .aos-animate {
+        transform: none !important;
+        opacity: 1 !important;
+    }
+}
+
+// Focus management for modals
+.modal {
+    &[aria-hidden="false"] {
+        .modal-dialog {
+            outline: none;
+        }
+        
+        .modal-content {
+            border: 2px solid var(--bs-primary);
+        }
+    }
+}
+
+// Accessible form enhancements
+.form-group {
+    position: relative;
+    
+    .required-indicator {
+        color: var(--bs-danger);
+        font-weight: bold;
+        margin-left: 0.25rem;
+        
+        &::after {
+            content: " (required)";
+            @extend .sr-only;
+        }
+    }
+    
+    .form-control {
+        &[aria-invalid="true"] {
+            border-color: var(--bs-danger) !important;
+            box-shadow: 0 0 0 2px rgba(var(--bs-danger-rgb), 0.25) !important;
+        }
+        
+        &[aria-describedby] {
+            // Ensure proper spacing for description
+            margin-bottom: 0.25rem;
+        }
+    }
+    
+    .invalid-feedback,
+    .error-message {
+        display: block;
+        color: var(--bs-danger);
+        font-size: 0.875rem;
+        margin-top: 0.25rem;
+        
+        &::before {
+            content: "Error: ";
+            font-weight: bold;
+        }
+    }
+    
+    .valid-feedback,
+    .success-message {
+        display: block;
+        color: var(--bs-success);
+        font-size: 0.875rem;
+        margin-top: 0.25rem;
+        
+        &::before {
+            content: "✓ ";
+        }
+    }
+}
+
+// Accessible table enhancements
+.table-accessible {
+    caption {
+        caption-side: top;
+        padding: 0.75rem;
+        color: var(--bs-secondary);
+        text-align: left;
+        font-weight: 600;
+    }
+    
+    th {
+        &[aria-sort] {
+            cursor: pointer;
+            user-select: none;
+            
+            &::after {
+                content: " ↕";
+                opacity: 0.5;
+                margin-left: 0.5rem;
+            }
+            
+            &[aria-sort="ascending"]::after {
+                content: " ↑";
+                opacity: 1;
+            }
+            
+            &[aria-sort="descending"]::after {
+                content: " ↓";
+                opacity: 1;
+            }
+        }
+    }
+    
+    .table-summary {
+        @extend .sr-only;
+    }
+}
+
+// Accessible notification styles
+.notification,
+.toast {
+    &[role="alert"] {
+        border-left: 4px solid;
+        
+        &.success {
+            border-left-color: var(--bs-success);
+        }
+        
+        &.error,
+        &.danger {
+            border-left-color: var(--bs-danger);
+        }
+        
+        &.warning {
+            border-left-color: var(--bs-warning);
+        }
+        
+        &.info {
+            border-left-color: var(--bs-info);
+        }
+    }
+    
+    .notification-icon {
+        margin-right: 0.5rem;
+        
+        &::after {
+            @extend .sr-only;
+        }
+    }
+    
+    &.success .notification-icon::after {
+        content: "Success: ";
+    }
+    
+    &.error .notification-icon::after,
+    &.danger .notification-icon::after {
+        content: "Error: ";
+    }
+    
+    &.warning .notification-icon::after {
+        content: "Warning: ";
+    }
+    
+    &.info .notification-icon::after {
+        content: "Information: ";
+    }
+}
+
+// Accessible chart container
+.chart-container {
+    position: relative;
+    
+    .chart-description {
+        @extend .sr-only;
+    }
+    
+    .chart-data-table {
+        @extend .sr-only;
+        
+        &:focus {
+            position: static;
+            width: auto;
+            height: auto;
+            overflow: visible;
+            clip: auto;
+            white-space: normal;
+        }
+    }
+    
+    canvas {
+        &:focus {
+            outline: 3px solid var(--bs-primary);
+            outline-offset: 2px;
+        }
+    }
+}
+
+// Accessible loading states
+.loading-spinner {
+    .sr-loading-text {
+        @extend .sr-only;
+    }
+}
+
+.skeleton-loader {
+    .sr-loading-text {
+        @extend .sr-only;
+    }
+}
+
+// Accessible dropdown menus
+.dropdown-menu {
+    &[aria-expanded="true"] {
+        .dropdown-item {
+            &:focus {
+                background-color: var(--bs-primary);
+                color: white;
+                outline: none;
+            }
+        }
+    }
+}
+
+// Accessible pagination
+.pagination {
+    .page-link {
+        &[aria-current="page"] {
+            font-weight: bold;
+            
+            &::after {
+                content: " (current page)";
+                @extend .sr-only;
+            }
+        }
+    }
+}
+
+// Accessible progress indicators
+.progress {
+    .progress-bar {
+        &[aria-valuenow] {
+            &::after {
+                content: attr(aria-valuenow) "% complete";
+                @extend .sr-only;
+            }
+        }
+    }
+}
+
+// Color contrast utilities
+.text-contrast-aa {
+    // Ensures AA level contrast (4.5:1)
+    color: var(--text-contrast-aa, #212529);
+}
+
+.text-contrast-aaa {
+    // Ensures AAA level contrast (7:1)
+    color: var(--text-contrast-aaa, #000000);
+}
+
+.bg-contrast-aa {
+    background-color: var(--bg-contrast-aa, #ffffff);
+}
+
+.bg-contrast-aaa {
+    background-color: var(--bg-contrast-aaa, #ffffff);
+}
+
+// Keyboard navigation helpers
+.keyboard-only {
+    display: none;
+    
+    .keyboard-navigation & {
+        display: block;
+    }
+}
+
+.mouse-only {
+    display: block;
+    
+    .keyboard-navigation & {
+        display: none;
+    }
+}
+
+// Focus within enhancements
+.focus-within-highlight {
+    &:focus-within {
+        box-shadow: 0 0 0 2px rgba(var(--bs-primary-rgb), 0.25);
+        border-radius: 0.25rem;
+    }
+}
+
+// Accessible spacing for touch targets
+.touch-target {
+    min-height: 44px;
+    min-width: 44px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+}
+
+// ARIA live region styles
+#aria-live-polite,
+#aria-live-assertive {
+    @extend .sr-only;
+}
+
+// Print accessibility
+@media print {
+    .skip-links,
+    .sr-only:not(.sr-only-focusable) {
+        display: none !important;
+    }
+    
+    a[href]::after {
+        content: " (" attr(href) ")";
+        font-size: 0.8em;
+        color: #666;
+    }
+    
+    .btn {
+        border: 1px solid #000 !important;
+        background: transparent !important;
+        color: #000 !important;
+    }
+}

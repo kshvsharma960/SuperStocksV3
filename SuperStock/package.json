@@ -1,0 +1,23 @@
+﻿{
+    "devDependencies":  {
+                            "imagemin-avif":  "^0.1.5",
+                            "postcss":  "^8.4.31",
+                            "terser":  "^5.24.0",
+                            "imagemin-mozjpeg":  "^10.0.0",
+                            "imagemin-webp":  "^7.0.0",
+                            "imagemin":  "^8.0.1",
+                            "sass":  "^1.69.0",
+                            "autoprefixer":  "^10.4.16",
+                            "cssnano":  "^6.0.1",
+                            "imagemin-pngquant":  "^9.0.2"
+                        },
+    "description":  "Build optimization for SuperStock",
+    "name":  "superstock-optimization",
+    "version":  "1.0.0",
+    "scripts":  {
+                    "build-js":  "terser wwwroot/js/*.js --compress --mangle --output wwwroot/js/site.min.js",
+                    "optimize-images":  "imagemin wwwroot/images/* --out-dir=wwwroot/images/optimized",
+                    "build":  "npm run build-css \u0026\u0026 npm run build-js",
+                    "build-css":  "sass wwwroot/scss/main.scss wwwroot/css/site.css --style=compressed --no-source-map"
+                }
+}

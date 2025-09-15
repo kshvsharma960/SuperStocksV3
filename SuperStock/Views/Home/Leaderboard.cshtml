@@ -1,23 +1,301 @@
 ﻿@{
     var rankDict = (Dictionary<string, int>)ViewData["rankDict"];
+    var currentUserEmail = User.Identity.Name;
 }
 
-
-<div class="container">
-    <div class="leaderboard">
-        <div class="head">
-            <i class="fas fa-crown"></i>
-            <h1>Leader Board</h1>
+<div class="leaderboard-page leaderboard-mobile">
+    <!-- Page Header with Competition Stats -->
+    <div class="page-header sticky-header-mobile">
+        <div class="container-mobile">
+            <div class="row align-items-center">
+                <div class="col-md-8">
+                    <h1 class="page-title heading-mobile">
+                        <i class="fas fa-trophy me-3"></i>
+                        Competition Leaderboard
+                    </h1>
+                    <p class="page-subtitle text-mobile">Track your performance against other traders</p>
+                </div>
+                <div class="col-md-4 mobile-text-center">
+                    <div class="competition-timer">
+                        <div class="timer-label">Competition Ends In</div>
+                        <div class="timer-display" id="competitionTimer">
+                            <span class="days">15</span>d 
+                            <span class="hours">08</span>h 
+                            <span class="minutes">45</span>m
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="competition-stats mobile-grid">
+                <div class="stat-card card-mobile touch-feedback">
+                    <div class="stat-icon">
+                        <i class="fas fa-users"></i>
+                    </div>
+                    <div class="stat-value" id="totalParticipants">@rankDict.Count</div>
+                    <div class="stat-label">Total Participants</div>
+                </div>
+                <div class="stat-card card-mobile touch-feedback">
+                    <div class="stat-icon">
+                        <i class="fas fa-medal"></i>
+                    </div>
+                    <div class="stat-value" id="yourRank">
+                        @(rankDict.ContainsKey(currentUserEmail) ? rankDict[currentUserEmail] : "N/A")
+                    </div>
+                    <div class="stat-label">Your Rank</div>
+                </div>
+                <div class="stat-card card-mobile touch-feedback">
+                    <div class="stat-icon">
+                        <i class="fas fa-chart-line"></i>
+                    </div>
+                    <div class="stat-value">₹10,00,000</div>
+                    <div class="stat-label">Starting Capital</div>
+                </div>
+                <div class="stat-card card-mobile touch-feedback">
+                    <div class="stat-icon">
+                        <i class="fas fa-gift"></i>
+                    </div>
+                    <div class="stat-value">₹50,000</div>
+                    <div class="stat-label">Prize Pool</div>
+                </div>
+            </div>
         </div>
-        <div class="body">
-            <ol>
-                @foreach (var kvp in rankDict){
-                    <li>
-                        <mark>@kvp.Key</mark>
-                        <small>@kvp.Value</small>
-                    </li>
-                }
-            </ol>
+    </div>
+
+    <div class="container-mobile mobile-spacing">
+        <!-- Top Performers Podium -->
+        <div class="top-performers mobile-spacing">
+            <h2 class="section-title heading-mobile">
+                <i class="fas fa-crown me-2"></i>
+                Top Performers
+            </h2>
+            <div class="podium" id="topPerformersPodium">
+                <!-- Podium will be populated by JavaScript -->
+            </div>
+        </div>
+
+        <!-- Leaderboard Table -->
+        <div class="leaderboard-table-section mobile-spacing">
+            <div class="table-header">
+                <div class="d-flex justify-content-between align-items-center flex-wrap">
+                    <h3 class="table-title heading-mobile">All Participants</h3>
+                    <div class="table-controls">
+                        <div class="search-container me-3 search-mobile">
+                            <div class="input-group">
+                                <span class="input-group-text">
+                                    <i class="fas fa-search"></i>
+                                </span>
+                                <input type="text" class="form-control form-control-touch no-zoom" id="leaderboardSearch" 
+                                       placeholder="Search participants...">
+                            </div>
+                        </div>
+                        <div class="filter-controls">
+                            <button class="btn btn-outline-primary btn-sm btn-touch touch-feedback me-2" id="refreshLeaderboard">
+                                <i class="fas fa-sync-alt"></i>
+                                <span class="mobile-hidden">Refresh</span>
+                            </button>
+                            <div class="dropdown dropdown-mobile">
+                                <button class="btn btn-outline-secondary btn-sm btn-touch touch-feedback dropdown-toggle" 
+                                        type="button" data-bs-toggle="dropdown">
+                                    <i class="fas fa-filter"></i>
+                                    <span class="mobile-hidden">Filter</span>
+                                </button>
+                                <ul class="dropdown-menu">
+                                    <li><a class="dropdown-item filter-option active touch-target" data-filter="all">All Participants</a></li>
+                                    <li><a class="dropdown-item filter-option touch-target" data-filter="top10">Top 10</a></li>
+                                    <li><a class="dropdown-item filter-option touch-target" data-filter="top50">Top 50</a></li>
+                                    <li><a class="dropdown-item filter-option touch-target" data-filter="gainers">Top Gainers</a></li>
+                                    <li><a class="dropdown-item filter-option touch-target" data-filter="losers">Top Losers</a></li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="table-responsive">
+                <table class="table leaderboard-table table-mobile swipeable" id="leaderboardTable">
+                    <thead>
+                        <tr>
+                            <th class="sortable touch-target" data-sort="rank">
+                                <span>Rank</span>
+                                <i class="fas fa-sort sort-icon"></i>
+                            </th>
+                            <th class="sortable touch-target" data-sort="user">
+                                <span>Participant</span>
+                                <i class="fas fa-sort sort-icon"></i>
+                            </th>
+                            <th class="sortable touch-target" data-sort="portfolio">
+                                <span>Portfolio Value</span>
+                                <i class="fas fa-sort sort-icon"></i>
+                            </th>
+                            <th class="sortable touch-target" data-sort="pnl">
+                                <span>P&L</span>
+                                <i class="fas fa-sort sort-icon"></i>
+                            </th>
+                            <th class="sortable touch-target mobile-hidden" data-sort="pnl-percent">
+                                <span>P&L %</span>
+                                <i class="fas fa-sort sort-icon"></i>
+                            </th>
+                            <th class="sortable touch-target mobile-hidden" data-sort="trades">
+                                <span>Total Trades</span>
+                                <i class="fas fa-sort sort-icon"></i>
+                            </th>
+                            <th class="mobile-hidden">Performance</th>
+                        </tr>
+                    </thead>
+                    <tbody id="leaderboardTableBody">
+                        <!-- Table rows will be populated by JavaScript -->
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- Loading State -->
+            <div class="loading-state" id="leaderboardLoading" style="display: none;">
+                <div class="d-flex justify-content-center align-items-center py-5">
+                    <div class="spinner-border text-primary me-3" role="status">
+                        <span class="visually-hidden">Loading...</span>
+                    </div>
+                    <span>Loading leaderboard data...</span>
+                </div>
+            </div>
+
+            <!-- Empty State -->
+            <div class="empty-state" id="leaderboardEmpty" style="display: none;">
+                <div class="text-center py-5">
+                    <i class="fas fa-users-slash fa-3x text-muted mb-3"></i>
+                    <h4>No participants found</h4>
+                    <p class="text-muted">Try adjusting your search or filter criteria</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Performance Charts Section -->
+        <div class="performance-charts">
+            <h2 class="section-title">
+                <i class="fas fa-chart-area me-2"></i>
+                Performance Analytics
+            </h2>
+            
+            <div class="charts-grid">
+                <div class="chart-card">
+                    <div class="chart-header">
+                        <h3 class="chart-title">Top Performers Trend</h3>
+                        <div class="chart-controls">
+                            <div class="btn-group btn-group-sm" role="group">
+                                <button type="button" class="btn btn-outline-primary active" data-period="7d">7D</button>
+                                <button type="button" class="btn btn-outline-primary" data-period="30d">30D</button>
+                                <button type="button" class="btn btn-outline-primary" data-period="90d">90D</button>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="chart-container">
+                        <canvas id="performanceTrendChart"></canvas>
+                    </div>
+                </div>
+
+                <div class="chart-card">
+                    <div class="chart-header">
+                        <h3 class="chart-title">Portfolio Distribution</h3>
+                    </div>
+                    <div class="chart-container">
+                        <canvas id="portfolioDistributionChart"></canvas>
+                    </div>
+                </div>
+            </div>
+
+            <div class="row mt-4">
+                <div class="col-lg-6">
+                    <div class="chart-card">
+                        <div class="chart-header">
+                            <h3 class="chart-title">
+                                <i class="fas fa-arrow-trend-up text-success me-2"></i>
+                                Top Gainers (24h)
+                            </h3>
+                        </div>
+                        <div class="top-movers" id="topGainers">
+                            <!-- Top gainers will be populated by JavaScript -->
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-lg-6">
+                    <div class="chart-card">
+                        <div class="chart-header">
+                            <h3 class="chart-title">
+                                <i class="fas fa-arrow-trend-down text-danger me-2"></i>
+                                Top Losers (24h)
+                            </h3>
+                        </div>
+                        <div class="top-movers" id="topLosers">
+                            <!-- Top losers will be populated by JavaScript -->
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="row mt-4">
+                <div class="col-12">
+                    <div class="chart-card">
+                        <div class="chart-header">
+                            <h3 class="chart-title">Competition Statistics</h3>
+                        </div>
+                        <div class="competition-stats-detailed">
+                            <div class="row">
+                                <div class="col-md-3">
+                                    <div class="stat-item">
+                                        <div class="stat-icon">
+                                            <i class="fas fa-chart-line"></i>
+                                        </div>
+                                        <div class="stat-content">
+                                            <div class="stat-value" id="avgPortfolioValue">₹10,50,000</div>
+                                            <div class="stat-label">Average Portfolio</div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-3">
+                                    <div class="stat-item">
+                                        <div class="stat-icon">
+                                            <i class="fas fa-exchange-alt"></i>
+                                        </div>
+                                        <div class="stat-content">
+                                            <div class="stat-value" id="totalTrades">1,247</div>
+                                            <div class="stat-label">Total Trades</div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-3">
+                                    <div class="stat-item">
+                                        <div class="stat-icon">
+                                            <i class="fas fa-percentage"></i>
+                                        </div>
+                                        <div class="stat-content">
+                                            <div class="stat-value" id="avgReturn">+5.2%</div>
+                                            <div class="stat-label">Average Return</div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-3">
+                                    <div class="stat-item">
+                                        <div class="stat-icon">
+                                            <i class="fas fa-clock"></i>
+                                        </div>
+                                        <div class="stat-content">
+                                            <div class="stat-value" id="daysRemaining">15</div>
+                                            <div class="stat-label">Days Remaining</div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
         </div>
     </div>
 </div>
+
+<!-- Include Chart.js -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<!-- Include leaderboard JavaScript -->
+<script src="~/js/leaderboard.js"></script>

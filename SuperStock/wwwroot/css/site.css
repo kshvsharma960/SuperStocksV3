@@ -1,79 +1,19 @@
-﻿/* Please see documentation at https://docs.microsoft.com/aspnet/core/client-side/bundling-and-minification
-for details on configuring this project to bundle and minify static web assets. */
+/* Error: $color: var(--color-gray-300) is not a color.
+ *     ,
+ * 160 |       background: darken($thumb-color, 10%);
+ *     |                   ^^^^^^^^^^^^^^^^^^^^^^^^^
+ *     '
+ *   wwwroot\scss\abstracts\_mixins.scss 160:19  custom-scrollbar()
+ *   wwwroot\scss\layout\_header.scss 97:5       @import
+ *   wwwroot\scss\main.scss 16:9                 root stylesheet */
 
-a.navbar-brand {
-  white-space: normal;
-  text-align: center;
-  word-break: break-all;
+body::before {
+  font-family: "Source Code Pro", "SF Mono", Monaco, Inconsolata, "Fira Mono",
+      "Droid Sans Mono", monospace, monospace;
+  white-space: pre;
+  display: block;
+  padding: 1em;
+  margin-bottom: 1em;
+  border-bottom: 2px solid black;
+  content: "Error: $color: var(--color-gray-300) is not a color.\a     \2577 \a 160 \2502        background: darken($thumb-color, 10%);\d\a     \2502                    ^^^^^^^^^^^^^^^^^^^^^^^^^\a     \2575 \a   wwwroot\\scss\\abstracts\\_mixins.scss 160:19  custom-scrollbar()\a   wwwroot\\scss\\layout\\_header.scss 97:5       @import\a   wwwroot\\scss\\main.scss 16:9                 root stylesheet";
 }
-
-/* Provide sufficient contrast against white background */
-a {
-  color: #0366d6;
-}
-
-.btn-primary {
-  color: #fff;
-  background-color: #1b6ec2;
-  border-color: #1861ac;
-}
-
-.nav-pills .nav-link.active, .nav-pills .show > .nav-link {
-  color: #fff;
-  background-color: #1b6ec2;
-  border-color: #1861ac;
-}
-
-/* Sticky footer styles
--------------------------------------------------- */
-html {
-  font-size: 14px;
-}
-@media (min-width: 768px) {
-  html {
-    font-size: 16px;
-  }
-}
-
-.border-top {
-  border-top: 1px solid #e5e5e5;
-}
-.border-bottom {
-  border-bottom: 1px solid #e5e5e5;
-}
-.smallFont{
-    font-size:50%;
-    font-weight:400;
-}
-
-.box-shadow {
-  box-shadow: 0 .25rem .75rem rgba(0, 0, 0, .05);
-}
-
-button.accept-policy {
-  font-size: 1rem;
-  line-height: inherit;
-}
-
-/* Sticky footer styles
--------------------------------------------------- */
-html {
-  position: relative;
-  min-height: 100%;
-}
-
-body {
-  /* Margin bottom by footer height */
-  margin-bottom: 60px;
-}
-.footer {
-  position: absolute;
-  bottom: 0;
-  width: 100%;
-  white-space: nowrap;
-  line-height: 60px; /* Vertically center the text there */
-}
-
-/*---------------UserData-------------------*/
-
-/*------------------------------------------*/
