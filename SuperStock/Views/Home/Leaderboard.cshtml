@@ -1,0 +1,23 @@
+﻿@{
+    var rankDict = (Dictionary<string, int>)ViewData["rankDict"];
+}
+
+
+<div class="container">
+    <div class="leaderboard">
+        <div class="head">
+            <i class="fas fa-crown"></i>
+            <h1>Leader Board</h1>
+        </div>
+        <div class="body">
+            <ol>
+                @foreach (var kvp in rankDict){
+                    <li>
+                        <mark>@kvp.Key</mark>
+                        <small>@kvp.Value</small>
+                    </li>
+                }
+            </ol>
+        </div>
+    </div>
+</div>

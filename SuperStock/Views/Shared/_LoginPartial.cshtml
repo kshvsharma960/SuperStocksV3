@@ -1,0 +1,16 @@
+﻿<ul class="navbar-nav">
+    @if (User.Identity.IsAuthenticated)
+    {
+        <li class="nav-item">
+        <li class="nav-item">@("Hello " + @User.Identity.Name)</li>
+        
+        </li>
+        <li class="nav-item">
+            @Html.ActionLink("LogOut", "Logout", "User")
+        </li>
+    }
+    else
+    {
+        <li class="nav-item">Hi Guest.</li>
+    }
+</ul>

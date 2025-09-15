@@ -1,0 +1,177 @@
+﻿@{
+    ViewData["Title"] = "Super Stock";
+}
+
+<div class="text-center">
+    <h1 id="user" class="display-4">Welcome @User.Identity.Name</h1>
+    <p>Welcome  to Super-Stock Portal.</p>
+</div>
+
+<div id="mainGrid" data-value="@ViewContext.RouteData.Values["Action"]" class="row">
+    <div id="gridHolding" class="col-lg-5 col-md-5 col-sm-5 col-xs-12 col-equal" style="text-align:center">
+        <label>Holdings</label>
+        <div id="grid">
+        </div>
+        <div id="gridFooter">
+        </div>
+    </div>
+    <div id="gridWatchList" class="col-lg-3 col-md-3 col-sm-3 col-xs-12 col-equal" style="text-align:center">
+        <label>Watch-List</label>
+        <div>
+            <div class="dropdown">
+                <select id="SearchStocks" style="width: -webkit-fill-available" class="js-data-example-ajax"></select>
+            </div>
+        </div>
+        <div id="grid2"></div>
+    </div>
+    <div id="gridUser" class="col-lg-4 col-md-4 col-sm-4 col-xs-12 col-equal">
+        <label>User Details</label>
+        <div id="grid3">
+            <table class="table">
+                <tbody>
+                    <tr>
+                        <td>Available Funds</td>
+                        <td> : </td>
+                        <td>
+                            <div>
+                                <div class="row" id="funds">0.00</div>
+                                <p class="row smallFont">This amount is available for trade</p>
+                            </div>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>Your Rank</td>
+                        <td> : </td>
+                        <td>
+                            <div>
+                                <div class="row" id="rank">1</div>
+                                <p class="row smallFont">Out of &nbsp;<label id="totalParticipants">1</label></p>
+                            </div>
+                        </td>
+                        <td></td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+<div id="myModal" class="modal" tabindex="-1" role="dialog">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 id="mStock" class="modal-title">Stock</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div><span class="badge badge-info">Current Price</span><span> &nbsp;:&nbsp;</span><span class="badge badge-info" id="mPrice">0.00</span></div>
+                <hr />
+                <div id="StockDetails" style="display:flex">
+                    <div style="width:50%">
+                        <table class="table table-light">
+                            <tr>
+                                <td class="badge badge-info">
+                                    Last Close
+                                </td>
+                                <td>
+                                    :
+                                </td>
+                                <td id="mLastClose">
+                                </td>
+                            </tr>
+                            <tr>
+                                <td class="badge badge-info">
+                                    Open Price
+                                </td>
+                                <td>
+                                    :
+                                </td>
+                                <td id="mOpen">
+                                </td>
+                            </tr>
+                        </table>
+                    </div>
+                    <div style="width:50%">
+                        <table class="table table-light">
+                            <tr>
+                                <td class="badge badge-info">
+                                    Today's High
+                                </td>
+                                <td>
+                                    :
+                                </td>
+                                <td id="mHigh">
+                                </td>
+                            </tr>
+                            <tr>
+                                <td class="badge badge-info">
+                                    Today's Low
+                                </td>
+                                <td>
+                                    :
+                                </td>
+                                <td id="mLow">
+                                </td>
+                            </tr>
+                        </table>
+                    </div>
+                </div>
+            </div>
+            <hr />
+            <div id="inputSection">
+                <table class="table">
+                    <tr>
+                        <td>
+                            <div class="form-outline">
+                                <label class="form-label" for="typeNumber">Quantity</label>
+                                <input type="number" id="mQuantity" min="1" class="form-control" />
+                            </div>
+                        </td>
+                        <td>
+                            <div class="form-outline">
+                                <label class="form-label" for="typeNumber">Order Type</label>
+                                <input style="width:100px" type="checkbox" onchange="document.getElementById('mOrderPrice').disabled=this.checked;" data-toggle="toggle" data-on="MARKET" data-off="LIMIT" data-onstyle="danger" data-offstyle="success">
+                            </div>
+                        </td>
+                        <td id="mOrderPriceTd">
+                            <div class="form-outline">
+                                <label class="form-label" for="mOrderPrice">Trigger</label>
+                                <input type="number" id="mOrderPrice" step="0.01" class="form-control" />
+                            </div>
+                            @*<input style="width:fit-content" type="checkbox" onclick="document.getElementById('mOrderPrice').disabled=this.checked;" checked data-toggle="toggle" data-on="MARKET" data-off="LIMIT" data-onstyle="danger" data-offstyle="success">*@
+                        </td>
+                        <td>
+                            @*<input id="mOrderPrice" name="orderPrice" disabled="disabled" type="number" step="0.01">*@
+                        </td>
+                    </tr>
+                </table>
+            </div>
+            <div class="modal-footer">
+                <button id="buyButton" onclick="OnBuySell(this)" type="button" class="btn btn-primary">Buy</button>
+                <button id="sellButton" onclick="OnBuySell(this)" type="button" class="btn btn-secondary">Sell</button>
+            </div>
+        </div>
+    </div>
+</div>
+<script>
+    window.onload = function () {
+        GetRank();
+        GetHoldingsGrid();
+        GetWatchListGrid();
+
+        setInterval(function () {
+            GetHoldingsGrid();
+            GetWatchListGrid();
+        }, 5e3);
+
+        setInterval(function () {
+            GetRank();
+        }, 30e3);        
+        GetUserData();
+        setTimeout(function () {
+            $('#user').fadeOut('slow');
+        }, 2e3);
+        DynamicSearch();
+    }
+</script>
