@@ -1,6 +1,7 @@
 ﻿@{
-    var rankDict = (Dictionary<string, int>)ViewData["rankDict"];
+    var rankDict = (Dictionary<string, int>)ViewData["rankDict"] ?? new Dictionary<string, int>();
     var currentUserEmail = User.Identity.Name;
+    var errorMessage = ViewData["error"] as string;
 }
 
 <div class="leaderboard-page leaderboard-mobile">
@@ -63,6 +64,15 @@
     </div>
 
     <div class="container-mobile mobile-spacing">
+        @if (!string.IsNullOrEmpty(errorMessage))
+        {
+            <div class="alert alert-warning alert-dismissible fade show" role="alert">
+                <i class="fas fa-exclamation-triangle me-2"></i>
+                <strong>Notice:</strong> @errorMessage
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            </div>
+        }
+
         <!-- Top Performers Podium -->
         <div class="top-performers mobile-spacing">
             <h2 class="section-title heading-mobile">

@@ -31,8 +31,15 @@ namespace SuperStock.Services
             mongoDatabase = mongoClient.GetDatabase("HomeStocks");
             mongoEquityCollection = mongoDatabase.GetCollection<Equities>("Equities");
             
+            try
+            {
                 LocalEquityList = mongoEquityCollection.Aggregate().ToList();
-            
+            }
+            catch (Exception)
+            {
+                // Initialize empty list if MongoDB connection fails
+                LocalEquityList = new List<Equities>();
+            }
         }
 
         public async Task<List<StockPriceModel>> GetStockPrice(params string[] symbols)
@@ -131,21 +138,25 @@ namespace SuperStock.Services
 
         private string DeleteFromWatchList(string watchList, string stock)
         {
-            string temp = "";
-            if(watchList.Contains(", " + stock))
+            if (string.IsNullOrWhiteSpace(watchList) || string.IsNullOrWhiteSpace(stock))
             {
-                temp = watchList.Replace(", " + stock, "");
-            }
-            else if (watchList.Contains(stock + ","))
-            {
-                temp = watchList.Replace(stock + ",","");
-            }
-            else
-            {
-                temp = watchList.Replace(stock, "");
+                return watchList ?? "";
             }
 
-            return temp;
+            // Sanitize input
+            var sanitizedStock = stock.Trim().ToUpperInvariant();
+
+            // Parse the watchlist into individual symbols
+            var symbols = watchList.Split(',')
+                .Select(s => s.Trim())
+                .Where(s => !string.IsNullOrWhiteSpace(s))
+                .ToList();
+
+            // Remove the stock (case-insensitive comparison)
+            symbols.RemoveAll(s => string.Equals(s.ToUpperInvariant(), sanitizedStock, StringComparison.OrdinalIgnoreCase));
+
+            // Return the updated watchlist string
+            return string.Join(", ", symbols);
         }
 
         internal string GetFundsFromEmail(string email,string gameType="")
@@ -170,47 +181,123 @@ namespace SuperStock.Services
 
         private string AddToWatchList(string watchList, string stock)
         {
-            string temp="";
+            if (string.IsNullOrWhiteSpace(stock))
+            {
+                return watchList ?? "";
+            }
+
+            // Sanitize and validate stock symbol
+            var sanitizedStock = stock.Trim().ToUpperInvariant();
+            
+            // Validate stock symbol format (alphanumeric, dots, hyphens, up to 20 chars)
+            if (!System.Text.RegularExpressions.Regex.IsMatch(sanitizedStock, @"^[A-Za-z0-9\.\-]{1,20}$"))
+            {
+                throw new ArgumentException($"Invalid stock symbol format: {stock}");
+            }
+
             if (string.IsNullOrWhiteSpace(watchList))
             {
-                temp = stock.Trim();
+                return sanitizedStock;
             }
-            else if(!watchList.Contains(stock.Trim()))
+
+            // Parse existing watchlist
+            var symbols = watchList.Split(',')
+                .Select(s => s.Trim())
+                .Where(s => !string.IsNullOrWhiteSpace(s))
+                .ToList();
+
+            // Check for duplicates (case-insensitive)
+            if (symbols.Any(s => string.Equals(s.ToUpperInvariant(), sanitizedStock, StringComparison.OrdinalIgnoreCase)))
             {
-                temp = watchList + ", " + stock;
+                return watchList; // Return unchanged if duplicate
             }
-            else
-            {
-                temp = watchList.Trim();
-            }
-            
-            return temp;
+
+            // Add the new stock
+            symbols.Add(sanitizedStock);
+            return string.Join(", ", symbols);
         }
 
 
         public void UpdateUserWatchList(string email, string stock, int action, string gameType="")
         {
-            var updatedWatchList = "";
-         
-            UserEquityHolding userStockData = new UserEquityHolding();
+            // Input validation
+            if (string.IsNullOrWhiteSpace(email))
+            {
+                throw new ArgumentException("Email cannot be null or empty", nameof(email));
+            }
+
+            if (string.IsNullOrWhiteSpace(stock))
+            {
+                throw new ArgumentException("Stock symbol cannot be null or empty", nameof(stock));
+            }
+
+            if (!email.Contains("@"))
+            {
+                throw new ArgumentException("Invalid email format", nameof(email));
+            }
+
             mongoUserHoldingCollection = mongoDatabase.GetCollection<UserEquityHolding>("UserStocksData"+gameType);
-            userStockData = mongoUserHoldingCollection.Find(x => x.Email == email).FirstOrDefault();
             
+            // Use transaction for atomic operation
+            using (var session = mongoDatabase.Client.StartSession())
+            {
+                session.StartTransaction();
+                
+                try
+                {
+                    var userStockData = mongoUserHoldingCollection.Find(session, x => x.Email == email).FirstOrDefault();
+                    
+                    if (userStockData == null)
+                    {
+                        throw new InvalidOperationException($"User with email {email} not found");
+                    }
 
-            if (action == 1)
-            { // add{
-                updatedWatchList = AddToWatchList(userStockData.WatchList, stock);
-            }
+                    var updatedWatchList = "";
+                    var originalWatchList = userStockData.WatchList ?? "";
 
-            else
-            {//delete
-                updatedWatchList = DeleteFromWatchList(userStockData.WatchList, stock);
+                    if (action == 1) // add
+                    {
+                        updatedWatchList = AddToWatchList(originalWatchList, stock);
+                        
+                        // Check if anything actually changed (duplicate prevention)
+                        if (updatedWatchList == originalWatchList)
+                        {
+                            throw new InvalidOperationException($"Stock '{stock}' is already in the watchlist");
+                        }
+                    }
+                    else if (action == 0) // delete
+                    {
+                        updatedWatchList = DeleteFromWatchList(originalWatchList, stock);
+                        
+                        // Check if anything actually changed (stock not found)
+                        if (updatedWatchList == originalWatchList)
+                        {
+                            throw new InvalidOperationException($"Stock '{stock}' is not in the watchlist");
+                        }
+                    }
+                    else
+                    {
+                        throw new ArgumentException("Invalid action. Use 1 for add, 0 for delete", nameof(action));
+                    }
+
+                    var filter = Builders<UserEquityHolding>.Filter.Eq(u => u.Email, email);
+                    var update = Builders<UserEquityHolding>.Update.Set(u => u.WatchList, updatedWatchList);
+                    
+                    var result = mongoUserHoldingCollection.UpdateOne(session, filter, update);
+                    
+                    if (result.ModifiedCount == 0)
+                    {
+                        throw new InvalidOperationException("Failed to update watchlist in database");
+                    }
+
+                    session.CommitTransaction();
+                }
+                catch
+                {
+                    session.AbortTransaction();
+                    throw;
+                }
             }
-            var filter = Builders<UserEquityHolding>.Filter.Eq("EMAIL", email);
-            var update = Builders<UserEquityHolding>.Update.Set("WATCHLIST", updatedWatchList);
-            userStockData.WatchList = updatedWatchList;
-            //mongoUserHoldingCollection.UpdateOne(x=>x.Email==email,userStockData.WatchList);            
-            mongoUserHoldingCollection.UpdateOne(filter,update);
         }
 
         public async Task<List<StockPriceModel>> GetUserWatchList(string email, string gameType = "")

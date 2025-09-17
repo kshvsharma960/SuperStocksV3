@@ -5,6 +5,8 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 using SuperStock.Models;
 using SuperStock.Services;
+using System;
+using System.Collections.Generic;
 using System.Diagnostics;
 using System.Net;
 using System.Security.Claims;
@@ -72,11 +74,40 @@ namespace SuperStock.Controllers
         [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
         public IActionResult Leaderboard()
         {
-            if (HttpContext.User.Identity is ClaimsIdentity identity)
+            try
             {
-                var email = identity.FindFirst(ClaimTypes.Email)?.Value;
-                var allUsers = _userService.GetParticipants();
-                ViewData["rankDict"] = _stockservice.GetRankOfAllUsers(email,allUsers);
+                if (HttpContext.User.Identity is ClaimsIdentity identity)
+                {
+                    var email = identity.FindFirst(ClaimTypes.Email)?.Value;
+                    
+                    if (string.IsNullOrEmpty(email))
+                    {
+                        _logger.LogWarning("No email found in user claims");
+                        ViewData["error"] = "User email not found";
+                        ViewData["rankDict"] = new Dictionary<string, int>();
+                        return View(ViewData);
+                    }
+
+                    var allUsers = _userService.GetParticipants();
+                    
+                    if (allUsers == null || allUsers.Count == 0)
+                    {
+                        _logger.LogWarning("No participants found in database");
+                        ViewData["error"] = "No participants found";
+                        ViewData["rankDict"] = new Dictionary<string, int>();
+                        return View(ViewData);
+                    }
+
+                    var rankDict = _stockservice.GetRankOfAllUsers(email, allUsers);
+                    ViewData["rankDict"] = rankDict ?? new Dictionary<string, int>();
+                    return View(ViewData);
+                }
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error loading leaderboard");
+                ViewData["error"] = $"Error loading leaderboard: {ex.Message}";
+                ViewData["rankDict"] = new Dictionary<string, int>();
                 return View(ViewData);
             }
 

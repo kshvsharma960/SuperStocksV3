@@ -16,6 +16,11 @@ namespace SuperStock.Models
         public double Low { get; set; }
         public int Count { get; set; }
         public double AveragePrice { get; set; }
+        
+        // New properties for enhanced stock data functionality
+        public DateTime LastUpdated { get; set; } = DateTime.UtcNow;
+        public string DataSource { get; set; } = string.Empty;
+        public bool IsStale { get; set; } = false;
     }
 
     public class OrderModel
